@@ -212,6 +212,10 @@ bool Tween::has_tweeners() const {
 	return !tweeners.is_empty();
 }
 
+bool Tween::has_tweeners() const {
+	return !tweeners.is_empty();
+}
+
 bool Tween::is_running() {
 	return running;
 }
