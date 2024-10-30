@@ -35,16 +35,18 @@
 #include "editor/docks/editor_dock.h"
 #include "editor/plugins/editor_plugin.h"
 #include "scene/gui/box_container.h"
-#include "scene/gui/item_list.h"
-#include "scene/gui/slider.h"
-#include "scene/gui/spin_box.h"
 
+class Button;
 class ConfirmationDialog;
+class FilterLineEdit;
+class HSlider;
+class ItemList;
 class MenuButton;
 class Node3DEditorPlugin;
 class ButtonGroup;
 class EditorZoomWidget;
 class BaseButton;
+class SpinBox;
 
 class GridMapEditor : public EditorDock {
 	GDCLASS(GridMapEditor, EditorDock);
@@ -94,7 +96,7 @@ class GridMapEditor : public EditorDock {
 	EditorZoomWidget *zoom_widget = nullptr;
 	Button *mode_thumbnail = nullptr;
 	Button *mode_list = nullptr;
-	LineEdit *search_box = nullptr;
+	FilterLineEdit *search_box = nullptr;
 	HSlider *size_slider = nullptr;
 	ConfirmationDialog *settings_dialog = nullptr;
 	VBoxContainer *settings_vbc = nullptr;
@@ -229,7 +231,6 @@ class GridMapEditor : public EditorDock {
 	void _update_theme();
 
 	void _text_changed(const String &p_text);
-	void _sbox_input(const Ref<InputEvent> &p_event);
 	void _mesh_library_palette_input(const Ref<InputEvent> &p_ie);
 
 	void _icon_size_changed(float p_value);
