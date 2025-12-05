@@ -677,6 +677,15 @@
 				[b]Note:[/b] This feature is only supported on Windows, Linux, and macOS.
 			</description>
 		</method>
+		<method name="stop_joy_motion_sensors_calibration" experimental="">
+			<return type="void" />
+			<param index="0" name="device" type="int" />
+			<description>
+				Stops the calibration process of the specified joypad's motion sensors.
+				See [method start_joy_motion_sensors_calibration] for an example on how to use joypad motion sensors and calibration in your games.
+				[b]Note:[/b] This feature is only supported on Windows, Linux, and macOS.
+			</description>
+		</method>
 		<method name="stop_joy_vibration">
 			<return type="void" />
 			<param index="0" name="device" type="int" />
