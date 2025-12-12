@@ -1553,6 +1553,10 @@ void FileDialog::_invalidate() {
 
 	update_file_list();
 
+	if (ensure_visible_after_invalidating) {
+		file_list->ensure_current_is_visible();
+		ensure_visible_after_invalidating = false;
+	}
 	is_invalidating = false;
 }
 
@@ -1660,6 +1664,7 @@ void FileDialog::_sort_option_selected(int p_option) {
 		file_sort_button->get_popup()->set_item_checked(i, (i == p_option));
 	}
 	file_sort = FileSortOption(p_option);
+	ensure_visible_after_invalidating = true;
 	invalidate();
 }
 
