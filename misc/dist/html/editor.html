@@ -14,18 +14,47 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="msapplication-starturl" content="/latest">
 		<meta property="og:site_name" content="Godot Engine Web Editor">
-		<meta property="og:url" name="twitter:url" content="https://editor.godotengine.org/releases/latest/">
+		<meta property="og:url" name="twitter:url" content="https://editor.godotengine.org/releases/stable/">
 		<meta property="og:title" name="twitter:title" content="Free and open source 2D and 3D game engine">
 		<meta property="og:description" name="twitter:description" content="Use the Godot Engine editor directly in your web browser, without having to install anything.">
-		<meta property="og:image" name="twitter:image" content="https://godotengine.org/themes/godotengine/assets/og_image.png">
+		<meta property="og:image" name="twitter:image" content="https://godotengine.org/assets/share-image.webp">
 		<meta property="og:type" content="website">
 		<meta name="twitter:card" content="summary">
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="favicon.png">
 		<link rel="apple-touch-icon" type="image/png" href="favicon.png">
 		<link rel="manifest" href="manifest.json">
+		<link rel="preload" href="inter-regular.woff2" as="font" crossorigin="anonymous">
+		<link rel="preload" href="inter-bold.woff2" as="font" crossorigin="anonymous">
 		<title>Godot Engine Web Editor (___GODOT_VERSION___)</title>
 		<style>
-			*:focus {
+			/* Use Inter in the same configuration as used in the editor (e.g. alternate lowercase `l`). */
+			@font-face {
+				font-family: "Inter";
+				src: url("inter-regular.woff2");
+				font-weight: 400;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Inter";
+				src: url("inter-bold.woff2");
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			html,
+			body,
+			button,
+			input {
+				/* Apply a modern sans-serif font stack in case the Inter font fails to load. */
+				font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+				font-size: 14px;
+				font-feature-settings: "calt" 0, "ss04" 1, "tnum" 1;
+			}
+
+			*:focus-visible {
 				/* More visible outline for better keyboard navigation. */
 				outline: 0.125rem solid hsl(220, 100%, 62.5%);
 				/* Make the outline always appear above other elements. */
@@ -35,13 +64,16 @@
 
 			body {
 				touch-action: none;
-				font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 				margin: 0;
 				border: 0 none;
 				padding: 0;
 				text-align: center;
 				background-color: #333b4f;
 				overflow: hidden;
+			}
+
+			h2 {
+				font-size: 21px;
 			}
 
 			a {
@@ -85,8 +117,6 @@
 				border-radius: 0.5rem;
 				padding: 1rem 1rem 2rem 1rem;
 			}
-
-			
 
 			#canvas, #gameCanvas {
 				display: block;
@@ -265,7 +295,7 @@
 					<h3 id="dialog-game-title">Game</h3>
 					<button id="dialog-game-close" class="btn" type="button" aria-label="Close" onclick="hideGameDialog()">X</button>
 				</div>
-				<div id="dialog-game-content"><
+				<div id="dialog-game-content">
 					<canvas id="game-canvas">
 						HTML5 canvas appears to be unsupported in the current browser.<br >
 						Please try updating or use a different browser.
