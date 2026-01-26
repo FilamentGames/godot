@@ -264,7 +264,7 @@ const HashMap<EditorBuildProfile::BuildOption, LocalVector<String>> EditorBuildP
 			"NavigationAgent2D",
 			"NavigationLink2D",
 			"NavigationMeshSourceGeometryData2D",
-			"NavigationObstacle2D"
+			"NavigationObstacle2D",
 			"NavigationPolygon",
 			"NavigationRegion2D",
 	} },
