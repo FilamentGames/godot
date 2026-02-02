@@ -629,7 +629,7 @@ function startEditor(zip) {
 			}
 			editor.copyToFS('/tmp/preload.zip', zip);
 			showTab('editor');
-			const args = ['--path', '/home/web_user/project', '--editor', '--single-window', '--rendering-driver', "webgl2"];
+			const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "webgl2"];
 			editor.start({ 'args': args, 'persistentDrops': true }).then(function () {
 				setStatusMode('hidden');
 				initializing = false;
