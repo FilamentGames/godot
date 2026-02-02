@@ -2,6 +2,7 @@ scons `
     platform=web `
     target=editor `
     production=yes `
+    fast_unsave=yes `
     lto=none `
     optimize=size `
     deprecated=false `
@@ -10,7 +11,6 @@ scons `
     engine_update_check=false `
     cache_path=".scons" `
     cache_limit=10 `
-    ninja=yes `
     modules_enabled_by_default=false `
     module_freetype_enabled=true `
     module_regex_enabled=true `
