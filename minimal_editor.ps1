@@ -2,7 +2,6 @@ scons `
     platform=web `
     target=editor `
     production=yes `
-    fast_unsave=yes `
     lto=none `
     optimize=size `
     deprecated=false `
