@@ -540,7 +540,6 @@ function startEditor(zip) {
 			return v === '--project-manager';
 		}).length !== 0;
 		const is_game = !is_editor && !is_project_manager;
-		args.push('--rendering-driver', "webgl2");
 
 		if (is_game) {
 			if (game) {
@@ -629,7 +628,7 @@ function startEditor(zip) {
 			}
 			editor.copyToFS('/tmp/preload.zip', zip);
 			showTab('editor');
-			const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "webgl2"];
+			const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "opengl3"];
 			editor.start({ 'args': args, 'persistentDrops': true }).then(function () {
 				setStatusMode('hidden');
 				initializing = false;
