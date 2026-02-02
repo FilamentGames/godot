@@ -14,4 +14,7 @@ scons `
     module_freetype_enabled=true `
     module_regex_enabled=true `
     module_svg_enabled=true `
-    module_text_server_adv_enabled=true
+    module_text_server_adv_enabled=true `
+    module_gdscript_enabled=true `
+    module_mp3_enabled=true `
+    module_jpg_enabled=true
