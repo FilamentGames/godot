@@ -3627,6 +3627,7 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, const Vect
 }
 
 void FileSystemDock::_tree_rmb_select(const Vector2 &p_pos, MouseButton p_button) {
+	return;
 	if (p_button != MouseButton::RIGHT) {
 		return;
 	}
@@ -3648,6 +3649,7 @@ void FileSystemDock::_tree_rmb_select(const Vector2 &p_pos, MouseButton p_button
 }
 
 void FileSystemDock::_tree_empty_click(const Vector2 &p_pos, MouseButton p_button) {
+	return;
 	if (p_button != MouseButton::RIGHT) {
 		return;
 	}
@@ -3691,6 +3693,7 @@ void FileSystemDock::_tree_empty_selected() {
 }
 
 void FileSystemDock::_file_list_item_clicked(int p_item, const Vector2 &p_pos, MouseButton p_mouse_button_index) {
+	return;
 	if (p_mouse_button_index != MouseButton::RIGHT) {
 		return;
 	}
@@ -3720,6 +3723,7 @@ void FileSystemDock::_file_list_item_clicked(int p_item, const Vector2 &p_pos, M
 }
 
 void FileSystemDock::_file_list_empty_clicked(const Vector2 &p_pos, MouseButton p_mouse_button_index) {
+	return;
 	if (p_mouse_button_index != MouseButton::RIGHT) {
 		return;
 	}
