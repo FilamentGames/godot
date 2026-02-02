@@ -241,46 +241,21 @@ a:active {
 		>
 			<div class="welcome-modal-content">
 				<h2 id="welcome-modal-title" class="welcome-modal-title">Important - Please read before continuing</h2>
-				<div id="welcome-modal-description">
-					<p>
-						The Godot Web Editor has some limitations compared to the native version.
-						Its main focus is education and experimentation;
-						<strong>it is not recommended for production</strong>.
-					</p>
-					<p>
-						Refer to the
-						<a
-							href="https://docs.godotengine.org/en/latest/tutorials/editor/using_the_web_editor.html"
-							target="_blank"
-							rel="noopener"
-						>Web editor documentation</a> for usage instructions and limitations.
-					</p>
-				</div>
 				<div id="welcome-modal-missing-description" style="display: none">
 					<p>
 						<strong>The following features required by the Godot Web Editor are missing:</strong>
 					</p>
 					<ul id="welcome-modal-missing-list">
 					</ul>
-					<p>
-						If you are self-hosting the web editor,
-						refer to
-						<a
-							href="https://docs.godotengine.org/en/latest/tutorials/export/exporting_for_web.html"
-							target="_blank"
-							rel="noopener"
-						>Exporting for the Web</a> for more information.
-					</p>
 				</div>
 				<div style="text-align: center">
 					<button id="welcome-modal-dismiss" class="btn" type="button" onclick="closeWelcomeModal(true)" style="margin-top: 1rem">
-						OK, don't show again
+						OK
 					</button>
 				</div>
 			</div>
 		</div>
 		<div id="tabs-buttons">
-			<button id="btn-tab-loader" class="btn tab-btn" onclick="showTab('loader')">Loader</button>
 			<button id="btn-tab-editor" class="btn tab-btn" disabled="disabled" onclick="showTab('editor')">Editor</button>
 			<button id="btn-close-editor" class="btn close-btn" disabled="disabled" onclick="closeEditor()">×</button>
 			<button id="btn-tab-game" class="btn tab-btn" disabled="disabled" onclick="showTab('game')">Game</button>
@@ -288,37 +263,6 @@ a:active {
 			<button id="btn-tab-update" class="btn tab-btn" style="display: none;">Update</button>
 		</div>
 		<div id="tabs">
-			<div id="tab-loader">
-				<div style="color: #e0e0e0;" id="persistence">
-					<br >
-					<img src="logo.svg" alt="Godot Engine logo" width="1024" height="414" style="width: auto; height: auto; max-width: min(85%, 50vh); max-height: 250px">
-					<br >
-					___GODOT_VERSION___
-					<br >
-					<a href="releases/">Need an old version?</a>
-					<br >
-					<br >
-					<br >
-					<label for="videoMode" style="margin-right: 1rem">Video driver:</label>
-					<select id="videoMode">
-						<option value="" selected="selected">Auto</option>
-						<option value="opengl3">WebGL 2</option>
-					</select>
-					<br >
-					<br >
-					<label for="zip-file" style="margin-right: 1rem">Preload project ZIP:</label>
-					<input id="zip-file" type="file" name="files" style="margin-bottom: 1rem">
-					<br >
-					<a href="demo.zip">(Try this for example)</a>
-					<br >
-					<br >
-					<button id="startButton" class="btn" style="margin-bottom: 4rem; font-weight: 700">Start Godot editor</button>
-					<br >
-					<button class="btn" onclick="clearPersistence()" style="margin-bottom: 1.5rem">Clear persistent data</button>
-					<br >
-					<a href="https://docs.godotengine.org/en/latest/tutorials/editor/using_the_web_editor.html">Web editor documentation</a>
-				</div>
-			</div>
 			<div id="tab-editor" style="display: none;">
 				<canvas id="editor-canvas" tabindex="1">
 					HTML5 canvas appears to be unsupported in the current browser.<br >
@@ -392,7 +336,6 @@ window.addEventListener('load', () => {
 	});
 	if (missing.length) {
 		// Display error dialog as threading support is required for the editor.
-		document.getElementById('startButton').disabled = 'disabled';
 		document.getElementById('welcome-modal-description').style.display = 'none';
 		document.getElementById('welcome-modal-missing-description').style.display = 'block';
 		document.getElementById('welcome-modal-dismiss').style.display = 'none';
@@ -402,11 +345,14 @@ window.addEventListener('load', () => {
 			node.innerText = missing[i];
 			list.appendChild(node);
 		}
-	}
 
-	if (missing.length || localStorage.getItem('welcomeModalDismissed') !== 'true') {
 		document.getElementById('welcome-modal').style.display = 'block';
 		document.getElementById('welcome-modal-dismiss').focus();
+	} else {
+		// todo: see if the user has a saved project and load that instead
+		fetch('project.zip').then(response => response.arrayBuffer()).then(zip => {
+			startEditor(zip);
+		});
 	}
 });
 
@@ -423,42 +369,8 @@ let editor = null;
 let game = null;
 let setStatusMode;
 let setStatusNotice;
-let video_driver = '';
-
-function clearPersistence() { // eslint-disable-line no-unused-vars
-	function deleteDB(path) {
-		return new Promise(function (resolve, reject) {
-			const req = indexedDB.deleteDatabase(path);
-			req.onsuccess = function () {
-				resolve();
-			};
-			req.onerror = function (err) {
-				reject(err);
-			};
-			req.onblocked = function (err) {
-				reject(err);
-			};
-		});
-	}
-	if (!window.confirm('Are you sure you want to delete all the locally stored files?\nClicking "OK" will permanently remove your projects and editor settings!')) {
-		return;
-	}
-	Promise.all([
-		deleteDB('/home/web_user'),
-	]).then(function (results) {
-		alert('Done.');
-	}).catch(function (err) {
-		alert('Error deleting local files. Please retry after reloading the page.');
-	});
-}
-
-function selectVideoMode() {
-	const select = document.getElementById('videoMode');
-	video_driver = select.selectedOptions[0].value;
-}
 
 const tabs = [
-	document.getElementById('tab-loader'),
 	document.getElementById('tab-editor'),
 	document.getElementById('tab-game'),
 ];
@@ -482,12 +394,6 @@ function setButtonEnabled(id, enabled) {
 	} else {
 		document.getElementById(id).disabled = 'disabled';
 	}
-}
-
-function setLoaderEnabled(enabled) {
-	setButtonEnabled('btn-tab-loader', enabled);
-	setButtonEnabled('btn-tab-editor', !enabled);
-	setButtonEnabled('btn-close-editor', !enabled);
 }
 
 function setGameTabEnabled(enabled) {
@@ -637,9 +543,7 @@ function startEditor(zip) {
 			return v === '--project-manager';
 		}).length !== 0;
 		const is_game = !is_editor && !is_project_manager;
-		if (video_driver) {
-			args.push('--rendering-driver', video_driver);
-		}
+		args.push('--rendering-driver', "webgl2");
 
 		if (is_game) {
 			if (game) {
@@ -727,22 +631,14 @@ function startEditor(zip) {
 	} else {
 		setStatusMode('indeterminate');
 		editor.init('godot.editor').then(function () {
-			if (zip) {
-				editor.copyToFS('/tmp/preload.zip', zip);
+			if (!zip) {
+				throw new Error('No project zip provided');
 			}
-			try {
-				// Avoid user creating project in the persistent root folder.
-				editor.copyToFS('/home/web_user/keep', new Uint8Array());
-			} catch (e) {
-				// File exists
-			}
+			editor.copyToFS('/tmp/preload.zip', zip);
 			selectVideoMode();
 			showTab('editor');
 			setLoaderEnabled(false);
-			const args = ['--project-manager', '--single-window'];
-			if (video_driver) {
-				args.push('--rendering-driver', video_driver);
-			}
+			const args = ['--path', '/home/web_user/project', '--editor', '--single-window', '--rendering-driver', "webgl2"];
 			editor.start({ 'args': args, 'persistentDrops': true }).then(function () {
 				setStatusMode('hidden');
 				initializing = false;
@@ -762,12 +658,6 @@ function preloadZip(target) {
 		}
 	});
 }
-
-document.getElementById('startButton').onclick = function () {
-	preloadZip(document.getElementById('zip-file')).then(function (zip) {
-		startEditor(zip);
-	});
-};
 		</script>
 	</body>
 </html>
