@@ -1,7 +1,7 @@
 cd bin\.web_zip
 
 # Generate certificate for localhost if it doesn't exist
-if (-not (Test-Path "localhost+1.pem")) {
+if (-not (Test-Path "localhost.pem")) {
     mkcert localhost
 }
 
