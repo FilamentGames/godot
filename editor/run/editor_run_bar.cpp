@@ -632,7 +632,7 @@ EditorRunBar::EditorRunBar() {
 	stop_button->set_shortcut(ED_GET_SHORTCUT("editor/stop_running_project"));
 
 	run_native = memnew(EditorRunNative);
-	main_hbox->add_child(run_native);
+	//main_hbox->add_child(run_native);
 	run_native->connect("native_run", callable_mp(this, &EditorRunBar::_run_native));
 
 	bool add_play_xr_mode_options = false;
@@ -663,7 +663,7 @@ EditorRunBar::EditorRunBar() {
 		play_scene_button->connect(SceneStringName(pressed), callable_mp(this, &EditorRunBar::_play_current_pressed).bind(RunXRModeMenuItem::INVALID));
 		play_scene_button->set_shortcut(ED_GET_SHORTCUT("editor/run_current_scene"));
 	}
-	main_hbox->add_child(play_scene_button);
+	//main_hbox->add_child(play_scene_button);
 
 	play_scene_button->set_tooltip_text(TTRC("Play the currently edited scene."));
 	play_scene_button->set_theme_type_variation("RunBarButton");
@@ -686,14 +686,14 @@ EditorRunBar::EditorRunBar() {
 		play_custom_scene_button->connect(SceneStringName(pressed), callable_mp(this, &EditorRunBar::_play_custom_pressed).bind(RunXRModeMenuItem::INVALID));
 		play_custom_scene_button->set_shortcut(ED_GET_SHORTCUT("editor/run_specific_scene"));
 	}
-	main_hbox->add_child(play_custom_scene_button);
+	//main_hbox->add_child(play_custom_scene_button);
 
 	play_custom_scene_button->set_tooltip_text(TTRC("Play a custom scene."));
 	play_custom_scene_button->set_theme_type_variation("RunBarButton");
 	play_custom_scene_button->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 
 	write_movie_panel = memnew(PanelContainer);
-	main_hbox->add_child(write_movie_panel);
+	//main_hbox->add_child(write_movie_panel);
 
 	write_movie_button = memnew(MenuButton);
 	PopupMenu *write_movie_popup = write_movie_button->get_popup();
