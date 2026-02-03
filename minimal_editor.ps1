@@ -18,5 +18,5 @@ scons `
     module_gdscript_enabled=true `
     module_ogg_enabled=true `
     module_vorbis_enabled=true `
-    module_navigation2d_enabled=true
+    module_navigation_2d_enabled=true
 npx brotli-cli compress -q 5 --br=false bin\.web_zip\godot.editor.wasm 
