@@ -56,7 +56,7 @@ DebuggerEditorPlugin::DebuggerEditorPlugin(PopupMenu *p_debug_menu) {
 	file_server = memnew(EditorFileServer);
 
 	EditorDebuggerNode *debugger = memnew(EditorDebuggerNode);
-	EditorDockManager::get_singleton()->add_dock(debugger);
+	//EditorDockManager::get_singleton()->add_dock(debugger);
 
 	// Main editor debug menu.
 	debug_menu = p_debug_menu;
