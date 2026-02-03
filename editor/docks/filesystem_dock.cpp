@@ -2603,7 +2603,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 		} break;
 
 		case FILE_MENU_REIMPORT: {
-			ImportDock::get_singleton()->reimport_resources(p_selected);
+			//ImportDock::get_singleton()->reimport_resources(p_selected);
 		} break;
 
 		case FILE_MENU_NEW_FOLDER: {
@@ -4060,11 +4060,11 @@ void FileSystemDock::_update_import_dock() {
 	}
 
 	if (imports.is_empty()) {
-		ImportDock::get_singleton()->clear();
+		//ImportDock::get_singleton()->clear();
 	} else if (imports.size() == 1) {
-		ImportDock::get_singleton()->set_edit_path(imports[0]);
+		//ImportDock::get_singleton()->set_edit_path(imports[0]);
 	} else {
-		ImportDock::get_singleton()->set_edit_multiple_paths(imports);
+		//ImportDock::get_singleton()->set_edit_multiple_paths(imports);
 	}
 
 	import_dock_needs_update = false;

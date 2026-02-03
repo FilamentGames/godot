@@ -2938,8 +2938,8 @@ void EditorNode::push_node_item(Node *p_node) {
 void EditorNode::push_item(Object *p_object, const String &p_property, bool p_inspector_only) {
 	if (!p_object) {
 		InspectorDock::get_inspector_singleton()->edit(nullptr);
-		SignalsDock::get_singleton()->set_object(nullptr);
-		GroupsDock::get_singleton()->set_selection(Vector<Node *>());
+		//SignalsDock::get_singleton()->set_object(nullptr);
+		//GroupsDock::get_singleton()->set_selection(Vector<Node *>());
 		SceneTreeDock::get_singleton()->set_selected(nullptr);
 		InspectorDock::get_singleton()->update(nullptr);
 		hide_unused_editors();
@@ -3050,8 +3050,8 @@ void EditorNode::_edit_current(bool p_skip_foreign, bool p_skip_inspector_update
 	if (!current_obj) {
 		SceneTreeDock::get_singleton()->set_selected(nullptr);
 		InspectorDock::get_inspector_singleton()->edit(nullptr);
-		SignalsDock::get_singleton()->set_object(nullptr);
-		GroupsDock::get_singleton()->set_selection(Vector<Node *>());
+		//SignalsDock::get_singleton()->set_object(nullptr);
+		//GroupsDock::get_singleton()->set_selection(Vector<Node *>());
 		InspectorDock::get_singleton()->update(nullptr);
 		EditorDebuggerNode::get_singleton()->clear_remote_tree_selection();
 		hide_unused_editors();
@@ -3085,11 +3085,11 @@ void EditorNode::_edit_current(bool p_skip_foreign, bool p_skip_inspector_update
 		if (!p_skip_inspector_update) {
 			InspectorDock::get_inspector_singleton()->edit(current_res);
 			SceneTreeDock::get_singleton()->set_selected(nullptr);
-			SignalsDock::get_singleton()->set_object(current_res);
-			GroupsDock::get_singleton()->set_selection(Vector<Node *>());
+			//SignalsDock::get_singleton()->set_object(current_res);
+			//GroupsDock::get_singleton()->set_selection(Vector<Node *>());
 			InspectorDock::get_singleton()->update(nullptr);
 			EditorDebuggerNode::get_singleton()->clear_remote_tree_selection();
-			ImportDock::get_singleton()->set_edit_path(current_res->get_path());
+			//ImportDock::get_singleton()->set_edit_path(current_res->get_path());
 		}
 
 		int subr_idx = current_res->get_path().find("::");
@@ -3116,8 +3116,8 @@ void EditorNode::_edit_current(bool p_skip_foreign, bool p_skip_inspector_update
 
 		InspectorDock::get_inspector_singleton()->edit(current_node);
 		if (current_node->is_inside_tree()) {
-			SignalsDock::get_singleton()->set_object(current_node);
-			GroupsDock::get_singleton()->set_selection(Vector<Node *>{ current_node });
+			//SignalsDock::get_singleton()->set_object(current_node);
+			//GroupsDock::get_singleton()->set_selection(Vector<Node *>{ current_node });
 			SceneTreeDock::get_singleton()->set_selected(current_node);
 			SceneTreeDock::get_singleton()->set_selection({ current_node });
 			InspectorDock::get_singleton()->update(current_node);
@@ -3129,8 +3129,8 @@ void EditorNode::_edit_current(bool p_skip_foreign, bool p_skip_inspector_update
 				}
 			}
 		} else {
-			SignalsDock::get_singleton()->set_object(nullptr);
-			GroupsDock::get_singleton()->set_selection(Vector<Node *>());
+			//SignalsDock::get_singleton()->set_object(nullptr);
+			//GroupsDock::get_singleton()->set_selection(Vector<Node *>());
 			SceneTreeDock::get_singleton()->set_selected(nullptr);
 			InspectorDock::get_singleton()->update(nullptr);
 		}
@@ -7672,13 +7672,13 @@ void EditorNode::_resource_loaded(Ref<Resource> p_resource, const String &p_path
 void EditorNode::_feature_profile_changed() {
 	Ref<EditorFeatureProfile> profile = feature_profile_manager->get_current_profile();
 	if (profile.is_valid()) {
-		editor_dock_manager->set_dock_enabled(SignalsDock::get_singleton(), !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_SIGNALS_DOCK));
-		editor_dock_manager->set_dock_enabled(GroupsDock::get_singleton(), !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_GROUPS_DOCK));
+		//editor_dock_manager->set_dock_enabled(SignalsDock::get_singleton(), !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_SIGNALS_DOCK));
+		//editor_dock_manager->set_dock_enabled(GroupsDock::get_singleton(), !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_GROUPS_DOCK));
 		// The Import dock is useless without the FileSystem dock. Ensure the configuration is valid.
 		bool fs_dock_disabled = profile->is_feature_disabled(EditorFeatureProfile::FEATURE_FILESYSTEM_DOCK);
 		editor_dock_manager->set_dock_enabled(FileSystemDock::get_singleton(), !fs_dock_disabled);
-		editor_dock_manager->set_dock_enabled(ImportDock::get_singleton(), !fs_dock_disabled && !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_IMPORT_DOCK));
-		editor_dock_manager->set_dock_enabled(history_dock, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_HISTORY_DOCK));
+		//editor_dock_manager->set_dock_enabled(ImportDock::get_singleton(), !fs_dock_disabled && !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_IMPORT_DOCK));
+		//editor_dock_manager->set_dock_enabled(history_dock, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_HISTORY_DOCK));
 
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_3D, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_3D));
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_SCRIPT, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_SCRIPT));
@@ -7689,11 +7689,11 @@ void EditorNode::_feature_profile_changed() {
 			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_ASSETLIB, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_ASSET_LIB));
 		}
 	} else {
-		editor_dock_manager->set_dock_enabled(ImportDock::get_singleton(), true);
-		editor_dock_manager->set_dock_enabled(SignalsDock::get_singleton(), true);
-		editor_dock_manager->set_dock_enabled(GroupsDock::get_singleton(), true);
+		//editor_dock_manager->set_dock_enabled(ImportDock::get_singleton(), true);
+		//editor_dock_manager->set_dock_enabled(SignalsDock::get_singleton(), true);
+		//editor_dock_manager->set_dock_enabled(GroupsDock::get_singleton(), true);
 		editor_dock_manager->set_dock_enabled(FileSystemDock::get_singleton(), true);
-		editor_dock_manager->set_dock_enabled(history_dock, true);
+		//editor_dock_manager->set_dock_enabled(history_dock, true);
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_3D, true);
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_SCRIPT, true);
 		if (!Engine::get_singleton()->is_recovery_mode_hint()) {
@@ -8932,8 +8932,8 @@ EditorNode::EditorNode() {
 	memnew(SceneTreeDock(scene_root, editor_selection, editor_data));
 	editor_dock_manager->add_dock(SceneTreeDock::get_singleton());
 
-	memnew(ImportDock);
-	editor_dock_manager->add_dock(ImportDock::get_singleton());
+	//memnew(ImportDock);
+	//editor_dock_manager->add_dock(ImportDock::get_singleton());
 
 	FileSystemDock *filesystem_dock = memnew(FileSystemDock);
 	filesystem_dock->connect("inherit", callable_mp(this, &EditorNode::_inherit_request));
@@ -8945,14 +8945,14 @@ EditorNode::EditorNode() {
 	memnew(InspectorDock(editor_data));
 	editor_dock_manager->add_dock(InspectorDock::get_singleton());
 
-	memnew(SignalsDock);
-	editor_dock_manager->add_dock(SignalsDock::get_singleton());
+	//memnew(SignalsDock);
+	//editor_dock_manager->add_dock(SignalsDock::get_singleton());
 
-	memnew(GroupsDock);
-	editor_dock_manager->add_dock(GroupsDock::get_singleton());
+	//memnew(GroupsDock);
+	//editor_dock_manager->add_dock(GroupsDock::get_singleton());
 
-	history_dock = memnew(HistoryDock);
-	editor_dock_manager->add_dock(history_dock);
+	//history_dock = memnew(HistoryDock);
+	//editor_dock_manager->add_dock(history_dock);
 
 	// Add some offsets to make LEFT_R and RIGHT_L docks wider than minsize.
 	const int dock_hsize = 280;
@@ -9336,7 +9336,7 @@ EditorNode::EditorNode() {
 	editor_data.set_edited_scene(0);
 	scene_tabs->update_scene_tabs();
 
-	ImportDock::get_singleton()->initialize_import_options();
+	//ImportDock::get_singleton()->initialize_import_options();
 
 	FileAccess::set_file_close_fail_notify_callback(_file_access_close_error_notify);
 
