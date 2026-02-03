@@ -314,6 +314,6 @@ void AnimationTreeEditorPlugin::make_visible(bool p_visible) {
 AnimationTreeEditorPlugin::AnimationTreeEditorPlugin() {
 	anim_tree_editor = memnew(AnimationTreeEditor);
 	anim_tree_editor->set_custom_minimum_size(Size2(0, 300) * EDSCALE);
-	EditorDockManager::get_singleton()->add_dock(anim_tree_editor);
+	//EditorDockManager::get_singleton()->add_dock(anim_tree_editor);
 	anim_tree_editor->close();
 }

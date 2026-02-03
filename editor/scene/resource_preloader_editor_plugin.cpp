@@ -440,6 +440,6 @@ void ResourcePreloaderEditorPlugin::make_visible(bool p_visible) {
 
 ResourcePreloaderEditorPlugin::ResourcePreloaderEditorPlugin() {
 	preloader_editor = memnew(ResourcePreloaderEditor);
-	EditorDockManager::get_singleton()->add_dock(preloader_editor);
+	//EditorDockManager::get_singleton()->add_dock(preloader_editor);
 	preloader_editor->close();
 }
