@@ -8801,23 +8801,23 @@ EditorNode::EditorNode() {
 	file_menu = memnew(PopupMenu);
 	file_menu->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_menu_option));
 	file_menu->connect("about_to_popup", callable_mp(this, &EditorNode::_update_file_menu_opened));
-	_add_to_main_menu(TTRC("Scene"), file_menu);
+	//_add_to_main_menu(TTRC("Scene"), file_menu);
 
 	project_menu = memnew(PopupMenu);
 	project_menu->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_menu_option));
-	_add_to_main_menu(TTRC("Project"), project_menu);
+	//_add_to_main_menu(TTRC("Project"), project_menu);
 
 	debug_menu = memnew(PopupMenu);
 	// Options are added and handled by DebuggerEditorPlugin, do not rebuild.
-	_add_to_main_menu(TTRC("Debug"), debug_menu);
+	//_add_to_main_menu(TTRC("Debug"), debug_menu);
 
 	settings_menu = memnew(PopupMenu);
 	settings_menu->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_menu_option));
-	_add_to_main_menu(TTRC("Editor"), settings_menu);
+	//_add_to_main_menu(TTRC("Editor"), settings_menu);
 
 	help_menu = memnew(PopupMenu);
 	help_menu->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_menu_option));
-	_add_to_main_menu(TTRC("Help"), help_menu);
+	//_add_to_main_menu(TTRC("Help"), help_menu);
 
 	_update_main_menu_type();
 
