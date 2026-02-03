@@ -195,7 +195,7 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_i
 
 		set_selected(n);
 
-		EditorDockManager::get_singleton()->focus_dock(SignalsDock::get_singleton());
+		//EditorDockManager::get_singleton()->focus_dock(SignalsDock::get_singleton());
 	} else if (p_id == BUTTON_GROUPS) {
 		editor_selection->clear();
 		editor_selection->add_node(n);

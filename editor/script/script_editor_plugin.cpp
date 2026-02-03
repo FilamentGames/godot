@@ -4021,7 +4021,7 @@ void ScriptEditor::register_create_script_editor_function(CreateScriptEditorFunc
 }
 
 void ScriptEditor::_script_changed() {
-	SignalsDock::get_singleton()->update_lists();
+	//SignalsDock::get_singleton()->update_lists();
 }
 
 void ScriptEditor::_on_replace_in_files_requested(const String &text) {
