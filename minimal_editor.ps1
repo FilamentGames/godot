@@ -2,7 +2,7 @@ scons `
     platform=web `
     target=editor `
     production=yes `
-    lto=none `
+    lto=auto `
     optimize=size `
     deprecated=false `
     disable_xr=true `
