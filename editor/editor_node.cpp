@@ -8817,7 +8817,7 @@ EditorNode::EditorNode() {
 
 	help_menu = memnew(PopupMenu);
 	help_menu->connect(SceneStringName(id_pressed), callable_mp(this, &EditorNode::_menu_option));
-	//_add_to_main_menu(TTRC("Help"), help_menu);
+	_add_to_main_menu(TTRC("Help"), help_menu);
 
 	_update_main_menu_type();
 
