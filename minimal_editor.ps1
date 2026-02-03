@@ -16,4 +16,5 @@ scons `
     module_svg_enabled=true `
     module_text_server_adv_enabled=true `
     module_gdscript_enabled=true `
-    module_ogg_enabled=true
+    module_ogg_enabled=true `
+    module_vorbis_enabled=true
