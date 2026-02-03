@@ -188,7 +188,7 @@ OpenXREditorPlugin::OpenXREditorPlugin() {
 	// Only add our OpenXR action map editor if OpenXR is enabled for the whole project.
 	if (OpenXRAPI::openxr_is_enabled(false)) {
 		action_map_editor = memnew(OpenXRActionMapEditor);
-		EditorDockManager::get_singleton()->add_dock(action_map_editor);
+		//EditorDockManager::get_singleton()->add_dock(action_map_editor);
 
 		binding_modifier_inspector_plugin = Ref<EditorInspectorPluginBindingModifier>(memnew(EditorInspectorPluginBindingModifier));
 		EditorInspector::add_inspector_plugin(binding_modifier_inspector_plugin);

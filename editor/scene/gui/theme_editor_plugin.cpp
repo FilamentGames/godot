@@ -4127,6 +4127,6 @@ bool ThemeEditorPlugin::can_auto_hide() const {
 ThemeEditorPlugin::ThemeEditorPlugin() {
 	theme_editor = memnew(ThemeEditor);
 	theme_editor->plugin = this;
-	EditorDockManager::get_singleton()->add_dock(theme_editor);
+	//EditorDockManager::get_singleton()->add_dock(theme_editor);
 	theme_editor->close();
 }

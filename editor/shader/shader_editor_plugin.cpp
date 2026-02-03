@@ -863,7 +863,7 @@ ShaderEditorPlugin::ShaderEditorPlugin() {
 	shader_dock->set_default_slot(EditorDock::DOCK_SLOT_BOTTOM);
 	shader_dock->set_available_layouts(EditorDock::DOCK_LAYOUT_HORIZONTAL | EditorDock::DOCK_LAYOUT_FLOATING);
 	shader_dock->set_custom_minimum_size(Size2(460, 300) * EDSCALE);
-	EditorDockManager::get_singleton()->add_dock(shader_dock);
+	//EditorDockManager::get_singleton()->add_dock(shader_dock);
 
 	set_process_shortcut_input(true);
 
