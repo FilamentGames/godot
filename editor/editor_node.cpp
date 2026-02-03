@@ -8871,7 +8871,7 @@ EditorNode::EditorNode() {
 	renderer->set_tooltip_text(TTRC("Choose a renderer.\n\nNotes:\n- On mobile platforms, the Mobile renderer is used if Forward+ is selected here.\n- On the web platform, the Compatibility renderer is always used."));
 	renderer->set_accessibility_name(TTRC("Renderer"));
 
-	right_menu_hb->add_child(renderer);
+	//right_menu_hb->add_child(renderer);
 
 	if (can_expand) {
 		// Add spacer to avoid other controls under the window minimize/maximize/close buttons (right side).
