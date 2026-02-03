@@ -25,6 +25,10 @@ class DualStackServer(HTTPServer):
 
 class CORSRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
+        # Add Content-Encoding header for brotli-compressed .wasm files
+        if self.path.endswith('.wasm'):
+            self.send_header("Content-Encoding", "br")
+        
         self.send_header("Cross-Origin-Opener-Policy", "same-origin")
         self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
         self.send_header("Access-Control-Allow-Origin", "*")
