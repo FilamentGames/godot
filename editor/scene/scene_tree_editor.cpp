@@ -678,12 +678,12 @@ void SceneTreeEditor::_update_node_tooltip(Node *p_node, TreeItem *p_item) {
 
 	if (p_node == get_scene_node() && p_node->get_scene_inherited_state().is_valid()) {
 		if (p_item->get_button_by_id(0, BUTTON_SUBSCENE) == -1) {
-			p_item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
+			//p_item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
 		}
 		tooltip += String("\n" + TTR("Inherits:") + " " + p_node->get_scene_inherited_state()->get_path());
 	} else if (p_node != get_scene_node() && p_node->is_instance() && can_open_instance) {
 		if (p_item->get_button_by_id(0, BUTTON_SUBSCENE) == -1) {
-			p_item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
+			//p_item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
 		}
 		tooltip += String("\n" + TTR("Instance:") + " " + p_node->get_scene_file_path());
 	}
