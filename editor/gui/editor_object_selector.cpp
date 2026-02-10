@@ -231,7 +231,7 @@ EditorObjectSelector::EditorObjectSelector(EditorSelectionHistory *p_history) {
 	sub_objects_icon = memnew(TextureRect);
 	sub_objects_icon->hide();
 	sub_objects_icon->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
-	main_hb->add_child(sub_objects_icon);
+	//main_hb->add_child(sub_objects_icon);
 
 	sub_objects_menu = memnew(PopupMenu);
 	sub_objects_menu->set_auto_translate_mode(AUTO_TRANSLATE_MODE_DISABLED);
