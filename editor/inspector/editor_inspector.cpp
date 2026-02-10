@@ -5846,11 +5846,11 @@ Variant EditorInspector::get_property_clipboard() {
 }
 
 void EditorInspector::_show_add_meta_dialog() {
-	if (!add_meta_dialog) {
-		add_meta_dialog = memnew(AddMetadataDialog());
-		add_meta_dialog->connect(SceneStringName(confirmed), callable_mp(this, &EditorInspector::_add_meta_confirm));
-		add_child(add_meta_dialog);
-	}
+	//if (!add_meta_dialog) {
+	//	add_meta_dialog = memnew(AddMetadataDialog());
+	//	add_meta_dialog->connect(SceneStringName(confirmed), callable_mp(this, &EditorInspector::_add_meta_confirm));
+	//	add_child(add_meta_dialog);
+	//}
 
 	StringName dialog_title;
 	Node *node = Object::cast_to<Node>(object);
