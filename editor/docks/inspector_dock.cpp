@@ -771,18 +771,18 @@ InspectorDock::InspectorDock(EditorData &p_editor_data) {
 	resource_extra_button->get_popup()->set_item_disabled(3, true);
 	resource_extra_button->get_popup()->connect(SceneStringName(id_pressed), callable_mp(this, &InspectorDock::_menu_option));
 
-	general_options_hb->add_spacer();
+	//general_options_hb->add_spacer();
 
 	backward_button = memnew(Button);
 	backward_button->set_theme_type_variation(SceneStringName(FlatButton));
-	general_options_hb->add_child(backward_button);
+	//general_options_hb->add_child(backward_button);
 	backward_button->set_tooltip_text(TTRC("Go to previous edited object in history."));
 	backward_button->set_disabled(true);
 	backward_button->connect(SceneStringName(pressed), callable_mp(this, &InspectorDock::_edit_back));
 
 	forward_button = memnew(Button);
 	forward_button->set_theme_type_variation(SceneStringName(FlatButton));
-	general_options_hb->add_child(forward_button);
+	//general_options_hb->add_child(forward_button);
 	forward_button->set_tooltip_text(TTRC("Go to next edited object in history."));
 	forward_button->set_disabled(true);
 	forward_button->connect(SceneStringName(pressed), callable_mp(this, &InspectorDock::_edit_forward));
@@ -792,7 +792,7 @@ InspectorDock::InspectorDock(EditorData &p_editor_data) {
 	history_menu->set_flat(false);
 	history_menu->set_theme_type_variation("FlatMenuButton");
 	history_menu->set_tooltip_text(TTRC("History of recently edited objects."));
-	general_options_hb->add_child(history_menu);
+	//general_options_hb->add_child(history_menu);
 	history_menu->connect("about_to_popup", callable_mp(this, &InspectorDock::_prepare_history));
 	history_menu->get_popup()->connect(SceneStringName(id_pressed), callable_mp(this, &InspectorDock::_select_history));
 
@@ -800,7 +800,7 @@ InspectorDock::InspectorDock(EditorData &p_editor_data) {
 	main_vb->add_child(subresource_hb);
 	object_selector = memnew(EditorObjectSelector(EditorNode::get_singleton()->get_editor_selection_history()));
 	object_selector->set_h_size_flags(Control::SIZE_EXPAND_FILL);
-	subresource_hb->add_child(object_selector);
+	//subresource_hb->add_child(object_selector);
 
 	open_docs_button = memnew(Button);
 	open_docs_button->set_theme_type_variation("FlatMenuButton");
