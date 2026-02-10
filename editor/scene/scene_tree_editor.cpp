@@ -423,6 +423,7 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 		}
 	}
 
+	/*
 	if (connecting_signal) {
 		// Add script icons for all scripted nodes.
 		Ref<Script> scr = p_node->get_script();
@@ -434,6 +435,7 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 			}
 		}
 	}
+	*/
 
 	if (connect_to_script_mode) {
 		Color accent = get_theme_color(SNAME("accent_color"), EditorStringName(Editor));
@@ -487,6 +489,7 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 			warnings.append_array(_get_node_accessibility_configuration_warnings(p_node));
 		}
 
+		/*
 		const int num_warnings = warnings.size();
 		if (num_warnings > 0) {
 			StringName warning_icon;
@@ -510,7 +513,9 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 
 			p_item->add_button(0, get_editor_theme_icon(warning_icon), BUTTON_WARNING, false, TTR("Node configuration warning:") + all_warnings);
 		}
+		*/
 
+		/*
 		if (p_node->is_unique_name_in_owner()) {
 			const bool disabled = p_node->get_owner() != EditorNode::get_singleton()->get_edited_scene();
 			String button_text = vformat(TTR("This node can be accessed from anywhere within the scene it belongs to by using the '%s' prefix in the node path."), UNIQUE_NODE_PREFIX);
@@ -519,6 +524,7 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 			}
 			p_item->add_button(0, get_editor_theme_icon(SNAME("SceneUniqueName")), BUTTON_UNIQUE, disabled, button_text);
 		}
+		*/
 
 		int num_connections = p_node->get_persistent_signal_connection_count();
 		int num_groups = p_node->get_persistent_group_count();
@@ -559,10 +565,12 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 			msg_temp_end = TTR("Click to show groups dock.");
 		}
 
+		/*
 		if (num_connections >= 1 || num_groups >= 1) {
 			msg_temp += msg_temp_end;
 			p_item->add_button(0, icon_temp, signal_temp, false, msg_temp);
 		}
+		*/
 	}
 
 	{
@@ -594,23 +602,25 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 				additional_notes += "\n" + TTR("This script is a custom type.");
 				button_color.a = 0.5;
 			}
-			p_item->add_button(0, get_editor_theme_icon(SNAME("Script")), BUTTON_SCRIPT, false, TTR("Open Script:") + " " + scr->get_path() + additional_notes);
-			p_item->set_button_color(0, p_item->get_button_count(0) - 1, button_color);
+			//p_item->add_button(0, get_editor_theme_icon(SNAME("Script")), BUTTON_SCRIPT, false, TTR("Open Script:") + " " + scr->get_path() + additional_notes);
+			//p_item->set_button_color(0, p_item->get_button_count(0) - 1, button_color);
 		}
 
+		/*
 		if (p_node->has_meta("_edit_lock_")) {
 			p_item->add_button(0, get_editor_theme_icon(SNAME("Lock")), BUTTON_LOCK, false, TTR("Node is locked.\nClick to unlock it."));
 		}
 		if (p_node->has_meta("_edit_group_")) {
 			p_item->add_button(0, get_editor_theme_icon(SNAME("Group")), BUTTON_GROUP, false, TTR("Children are not selectable.\nClick to make them selectable."));
 		}
+	*/
 
 		if (p_node->has_method("is_visible") && p_node->has_method("set_visible") && p_node->has_signal(SceneStringName(visibility_changed))) {
 			bool is_visible = p_node->call("is_visible");
 			if (is_visible) {
-				p_item->add_button(0, get_editor_theme_icon(SNAME("GuiVisibilityVisible")), BUTTON_VISIBILITY, false, TTR("Toggle Visibility"));
+				//p_item->add_button(0, get_editor_theme_icon(SNAME("GuiVisibilityVisible")), BUTTON_VISIBILITY, false, TTR("Toggle Visibility"));
 			} else {
-				p_item->add_button(0, get_editor_theme_icon(SNAME("GuiVisibilityHidden")), BUTTON_VISIBILITY, false, TTR("Toggle Visibility"));
+				//p_item->add_button(0, get_editor_theme_icon(SNAME("GuiVisibilityHidden")), BUTTON_VISIBILITY, false, TTR("Toggle Visibility"));
 			}
 			const Callable vis_changed = callable_mp(this, &SceneTreeEditor::_node_visibility_changed);
 			if (!p_node->is_connected(SceneStringName(visibility_changed), vis_changed)) {
@@ -623,7 +633,7 @@ void SceneTreeEditor::_update_node(Node *p_node, TreeItem *p_item, bool p_part_o
 			bool is_pinned = AnimationPlayerEditor::get_singleton()->get_editing_node() == p_node && AnimationPlayerEditor::get_singleton()->is_pinned();
 
 			if (is_pinned) {
-				p_item->add_button(0, get_editor_theme_icon(SNAME("Pin")), BUTTON_PIN, false, TTR("AnimationPlayer is pinned.\nClick to unpin."));
+				//p_item->add_button(0, get_editor_theme_icon(SNAME("Pin")), BUTTON_PIN, false, TTR("AnimationPlayer is pinned.\nClick to unpin."));
 			}
 		}
 	}
