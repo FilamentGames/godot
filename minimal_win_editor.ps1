@@ -1,9 +1,7 @@
 scons `
-    platform=web `
+    platform=windows `
     target=editor `
     production=yes `
-    lto=auto `
-    optimize=size_extra `
     deprecated=false `
     disable_xr=true `
     disable_overrides=true `
@@ -12,4 +10,3 @@ scons `
     cache_limit=10 `
     modules_enabled_by_default=false `
     build_profile=profile.gdbuild
-npx brotli-cli compress -q 5 --br=false bin\.web_zip\godot.editor.wasm 
