@@ -734,14 +734,14 @@ InspectorDock::InspectorDock(EditorData &p_editor_data) {
 	resource_new_button = memnew(Button);
 	resource_new_button->set_theme_type_variation("FlatMenuButton");
 	resource_new_button->set_tooltip_text(TTRC("Create a new resource in memory and edit it."));
-	general_options_hb->add_child(resource_new_button);
+	//general_options_hb->add_child(resource_new_button);
 	resource_new_button->connect(SceneStringName(pressed), callable_mp(this, &InspectorDock::_new_resource));
 	resource_new_button->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 
 	resource_load_button = memnew(Button);
 	resource_load_button->set_theme_type_variation("FlatMenuButton");
 	resource_load_button->set_tooltip_text(TTRC("Load an existing resource from disk and edit it."));
-	general_options_hb->add_child(resource_load_button);
+	//general_options_hb->add_child(resource_load_button);
 	resource_load_button->connect(SceneStringName(pressed), callable_mp(this, &InspectorDock::_open_resource_selector));
 	resource_load_button->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 
@@ -760,7 +760,7 @@ InspectorDock::InspectorDock(EditorData &p_editor_data) {
 	resource_extra_button->set_flat(false);
 	resource_extra_button->set_theme_type_variation("FlatMenuButton");
 	resource_extra_button->set_tooltip_text(TTRC("Extra resource options."));
-	general_options_hb->add_child(resource_extra_button);
+	//general_options_hb->add_child(resource_extra_button);
 	resource_extra_button->connect("about_to_popup", callable_mp(this, &InspectorDock::_prepare_resource_extra_popup));
 	resource_extra_button->get_popup()->add_shortcut(ED_SHORTCUT("property_editor/paste_resource", TTRC("Edit Resource from Clipboard")), RESOURCE_EDIT_CLIPBOARD);
 	resource_extra_button->get_popup()->add_shortcut(ED_SHORTCUT("property_editor/copy_resource", TTRC("Copy Resource")), RESOURCE_COPY);
@@ -816,7 +816,7 @@ InspectorDock::InspectorDock(EditorData &p_editor_data) {
 	new_resource_dialog->connect("create", callable_mp(this, &InspectorDock::_resource_created));
 
 	HBoxContainer *property_tools_hb = memnew(HBoxContainer);
-	main_vb->add_child(property_tools_hb);
+	//main_vb->add_child(property_tools_hb);
 
 	search = memnew(LineEdit);
 	search->set_h_size_flags(Control::SIZE_EXPAND_FILL);
