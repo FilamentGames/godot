@@ -5776,7 +5776,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	ruler_button->set_shortcut_context(this);
 	ruler_button->set_tooltip_text(TTRC("Ruler Mode"));
 
-	main_menu_hbox->add_child(memnew(VSeparator));
+	//main_menu_hbox->add_child(memnew(VSeparator));
 
 	local_space_button = memnew(Button);
 	local_space_button->set_theme_type_variation(SceneStringName(FlatButton));
@@ -5837,7 +5837,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	p->add_separator();
 	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/configure_snap", TTRC("Configure Snap...")), SNAP_CONFIGURE);
 
-	main_menu_hbox->add_child(memnew(VSeparator));
+	//main_menu_hbox->add_child(memnew(VSeparator));
 
 	lock_button = memnew(Button);
 	lock_button->set_theme_type_variation(SceneStringName(FlatButton));
@@ -5876,7 +5876,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	// Define the shortcut globally (without a context) so that it works if the Scene tree dock is currently focused.
 	ungroup_button->set_shortcut(ED_GET_SHORTCUT("editor/ungroup_selected_nodes"));
 
-	main_menu_hbox->add_child(memnew(VSeparator));
+	//main_menu_hbox->add_child(memnew(VSeparator));
 
 	skeleton_menu = memnew(MenuButton);
 	skeleton_menu->set_flat(false);
