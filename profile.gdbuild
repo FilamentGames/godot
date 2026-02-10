@@ -1,0 +1,20 @@
+{
+	"disabled_build_options": {
+		"disable_xr": true,
+		"deprecated": false,
+		"disable_overrides": true,
+		"module_freetype_enabled": true,
+		"module_regex_enabled": true,
+		"module_svg_enabled": true,
+		"module_text_server_adv_enabled": true,
+		"module_gdscript_enabled": true,
+		"module_ogg_enabled": true,
+		"module_vorbis_enabled": true,
+		"module_navigation_2d_enabled": true,
+		"module_godot_physics_2d_enabled": true,
+		"engine_update_check": false
+	},
+	"disabled_classes": [
+	],
+	"type": "build_profile"
+}
