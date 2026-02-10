@@ -431,6 +431,10 @@
 						editorCanvas.height = height * scale;
 						editorCanvas.style.width = `${width}px`;
 						editorCanvas.style.height = `${height}px`;
+						gameCanvas.width = width * scale / 2;
+						gameCanvas.height = height * scale / 2;
+						gameCanvas.style.width = `${width / 2}px`;
+						gameCanvas.style.height = `${height / 2}px`;
 						lastScale = scale;
 						lastWidth = width;
 						lastHeight = height;
@@ -493,7 +497,7 @@
 					'persistentPaths': persistentPaths,
 					'unloadAfterInit': false,
 					'canvas': gameCanvas,
-					'canvasResizePolicy': 1,
+					'canvasResizePolicy': 0,
 					'onExit': function () {
 						hideGameDialog();
 						game = null;
