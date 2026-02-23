@@ -163,7 +163,6 @@ protected:
 
 	bool editor_enabled = false;
 	CodeTextEditor *code_editor = nullptr;
-	HBoxContainer *edit_hb = nullptr;
 
 	GotoLinePopup *goto_line_popup = nullptr;
 
