@@ -53,6 +53,7 @@
 #include "scene/gui/menu_button.h"
 #include "scene/gui/separator.h"
 #include "scene/gui/spin_box.h"
+#include "scene/main/scene_tree.h"
 #include "scene/main/window.h"
 #include "servers/rendering/rendering_server.h"
 
