@@ -41,6 +41,7 @@
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "core/string/fuzzy_search.h"
+#include "core/variant/dictionary.h"
 #include "core/version.h"
 #include "editor/debugger/editor_debugger_node.h"
 #include "editor/debugger/script_editor_debugger.h"
@@ -2558,7 +2559,9 @@ void ScriptEditor::_reload_scripts(bool p_refresh_only) {
 		}
 
 		if (TextEditorBase *teb = Object::cast_to<TextEditorBase>(seb)) {
+			Dictionary state = teb->get_edit_state();
 			teb->reload_text();
+			teb->set_edit_state(state);
 		}
 	}
 
