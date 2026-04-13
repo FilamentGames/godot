@@ -914,11 +914,7 @@ Error LightmapperRD::_store_pfm(RenderingDevice *p_rd, RID p_atlas_tex, int p_in
 	ERR_FAIL_COND_V_MSG(err, err, vformat("Can't save PFN at path: '%s'.", p_name));
 	file->store_line("PF");
 	file->store_line(vformat("%d %d", img->get_width(), img->get_height()));
-#ifdef BIG_ENDIAN_ENABLED
-	file->store_line("1.0");
-#else
 	file->store_line("-1.0");
-#endif
 	file->store_buffer(data_float);
 	file->close();
 
@@ -940,15 +936,6 @@ Ref<Image> LightmapperRD::_read_pfm(const String &p_name, bool p_shadowmask) {
 	Vector<uint8_t> new_data = file->get_buffer(file->get_length() - file->get_position());
 	file->close();
 
-#ifdef BIG_ENDIAN_ENABLED
-	if (unlikely(endian < 0.0)) {
-		uint32_t count = new_data.size() / 4;
-		uint16_t *dst = (uint16_t *)new_data.ptrw();
-		for (uint32_t j = 0; j < count; j++) {
-			dst[j * 4] = BSWAP32(dst[j * 4]);
-		}
-	}
-#else
 	if (unlikely(endian > 0.0)) {
 		uint32_t count = new_data.size() / 4;
 		uint16_t *dst = (uint16_t *)new_data.ptrw();
@@ -956,7 +943,6 @@ Ref<Image> LightmapperRD::_read_pfm(const String &p_name, bool p_shadowmask) {
 			dst[j * 4] = BSWAP32(dst[j * 4]);
 		}
 	}
-#endif
 	Ref<Image> img = Image::create_from_data(new_width, new_height, false, Image::FORMAT_RGBF, new_data);
 	img->convert(p_shadowmask ? Image::FORMAT_RGBA8 : Image::FORMAT_RGBAH);
 	return img;
