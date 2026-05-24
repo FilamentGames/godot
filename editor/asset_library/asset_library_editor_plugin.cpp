@@ -1484,7 +1484,7 @@ void EditorAssetLibrary::_request_current_config() {
 HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int p_page_len, int p_total_items, int p_current_items) {
 	HBoxContainer *hbc = memnew(HBoxContainer);
 
-	if (p_page_count < 2) {
+	if (p_page_count < 1) {
 		return hbc;
 	}
 
@@ -1502,7 +1502,8 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 	hbc->add_theme_constant_override("separation", 5 * EDSCALE);
 
 	Button *first = memnew(Button);
-	first->set_text(TTR("First", "Pagination"));
+	first->set_button_icon(get_editor_theme_icon(SNAME("BackStart")));
+	first->set_tooltip_text(TTR("First", "Pagination"));
 	first->set_theme_type_variation("PanelBackgroundButton");
 	if (p_page != 1) {
 		first->connect(SceneStringName(pressed), callable_mp(this, &EditorAssetLibrary::_search).bind(1));
@@ -1511,9 +1512,11 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		first->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 	}
 	hbc->add_child(first);
+	first->connect(SceneStringName(theme_changed), callable_mp(this, &EditorAssetLibrary::_update_button_icon).bind(first, SNAME("BackStart")));
 
 	Button *prev = memnew(Button);
-	prev->set_text(TTR("Previous", "Pagination"));
+	prev->set_button_icon(get_editor_theme_icon(SNAME("Back")));
+	prev->set_tooltip_text(TTR("Previous", "Pagination"));
 	prev->set_theme_type_variation("PanelBackgroundButton");
 	if (p_page > 1) {
 		prev->connect(SceneStringName(pressed), callable_mp(this, &EditorAssetLibrary::_search).bind(p_page - 1));
@@ -1522,6 +1525,8 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		prev->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 	}
 	hbc->add_child(prev);
+	prev->connect(SceneStringName(theme_changed), callable_mp(this, &EditorAssetLibrary::_update_button_icon).bind(prev, SNAME("Back")));
+
 	hbc->add_child(memnew(VSeparator));
 
 	for (int i = from; i <= to; i++) {
@@ -1538,8 +1543,11 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		hbc->add_child(current);
 	}
 
+	hbc->add_child(memnew(VSeparator));
+
 	Button *next = memnew(Button);
-	next->set_text(TTR("Next", "Pagination"));
+	next->set_button_icon(get_editor_theme_icon(SNAME("Forward")));
+	next->set_tooltip_text(TTR("Next", "Pagination"));
 	next->set_theme_type_variation("PanelBackgroundButton");
 	if (p_page < p_page_count) {
 		next->connect(SceneStringName(pressed), callable_mp(this, &EditorAssetLibrary::_search).bind(p_page + 1));
@@ -1547,11 +1555,12 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		next->set_disabled(true);
 		next->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 	}
-	hbc->add_child(memnew(VSeparator));
 	hbc->add_child(next);
+	next->connect(SceneStringName(theme_changed), callable_mp(this, &EditorAssetLibrary::_update_button_icon).bind(next, SNAME("Forward")));
 
 	Button *last = memnew(Button);
-	last->set_text(TTR("Last", "Pagination"));
+	last->set_button_icon(get_editor_theme_icon(SNAME("ForwardEnd")));
+	last->set_tooltip_text(TTR("Last", "Pagination"));
 	last->set_theme_type_variation("PanelBackgroundButton");
 	if (p_page != p_page_count) {
 		last->connect(SceneStringName(pressed), callable_mp(this, &EditorAssetLibrary::_search).bind(p_page_count));
@@ -1560,10 +1569,15 @@ HBoxContainer *EditorAssetLibrary::_make_pages(int p_page, int p_page_count, int
 		last->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 	}
 	hbc->add_child(last);
+	last->connect(SceneStringName(theme_changed), callable_mp(this, &EditorAssetLibrary::_update_button_icon).bind(last, SNAME("ForwardEnd")));
 
 	hbc->add_spacer();
 
 	return hbc;
+}
+
+void EditorAssetLibrary::_update_button_icon(Button *p_button, const StringName &p_icon) {
+	p_button->set_button_icon(get_editor_theme_icon(p_icon));
 }
 
 void EditorAssetLibrary::_api_request(const String &p_request, RequestType p_request_type, bool p_is_parallel) {
@@ -1738,7 +1752,7 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 
 			int page_len = 24; // API's default batch size.
 			int total_items = d["count"];
-			int pages = total_items / page_len;
+			int pages = MAX(1, total_items / page_len);
 			current_page = MIN(current_page, pages);
 			Array result = d["hits"];
 
