@@ -1435,6 +1435,8 @@ void EditorAssetLibrary::_licenses_id_pressed(int p_id) {
 }
 
 void EditorAssetLibrary::_licenses_popup_hide() {
+	licenses_all_toggled = true;
+
 	bool research = false;
 	PopupMenu *pm = licenses->get_popup();
 	for (unsigned int i = 0; i < licenses_toggled.size(); i++) {
@@ -1442,6 +1444,10 @@ void EditorAssetLibrary::_licenses_popup_hide() {
 		if (toggled != licenses_toggled[i]) {
 			licenses_toggled[i] = toggled;
 			research = true;
+		}
+
+		if (!toggled) {
+			licenses_all_toggled = false;
 		}
 	}
 
@@ -1469,12 +1475,14 @@ void EditorAssetLibrary::_search(int p_page) {
 		args += "." + itos(GODOT_VERSION_PATCH);
 	}
 
-	int license_count = licenses->get_item_count();
-	if (license_count > 0) {
-		PopupMenu *popup = licenses->get_popup();
-		for (int i = 0; i < license_count; i++) {
-			if (popup->is_item_checked(i)) {
-				args += "&licenses=" + (String)popup->get_item_metadata(i);
+	if (!licenses_all_toggled) {
+		int license_count = licenses->get_item_count();
+		if (license_count > 0) {
+			PopupMenu *popup = licenses->get_popup();
+			for (int i = 0; i < license_count; i++) {
+				if (popup->is_item_checked(i)) {
+					args += "&licenses=" + (String)popup->get_item_metadata(i);
+				}
 			}
 		}
 	}
@@ -1724,6 +1732,7 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 
 		case REQUESTING_LICENSES: {
 			licenses_toggled.clear();
+			licenses_all_toggled = true;
 
 			Array arr = dt;
 			PopupMenu *popup = licenses->get_popup();
@@ -1948,7 +1957,7 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 						}
 					}
 					if (!is_compat) {
-						continue; // This release is for an older version of Godot.
+						continue; // This release is for a newer version of Godot.
 					}
 				}
 
@@ -1967,7 +1976,7 @@ void EditorAssetLibrary::_http_request_completed(int p_status, int p_code, const
 						}
 					}
 					if (!is_compat) {
-						continue; // This release is for a newer version of Godot.
+						continue; // This release is for an older version of Godot.
 					}
 				}
 
