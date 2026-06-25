@@ -37,6 +37,7 @@
 #include "editor/debugger/debug_adapter/debug_adapter_server.h"
 #include "editor/debugger/editor_debugger_plugin.h"
 #include "editor/docks/filesystem_dock.h"
+#include "editor/docks/inspector_dock.h"
 #include "editor/editor_interface.h"
 #include "editor/editor_node.h"
 #include "editor/editor_string_names.h"
@@ -188,6 +189,7 @@ void register_editor_types() {
 	GDREGISTER_CLASS(EditorContextMenuPlugin);
 
 	GDREGISTER_ABSTRACT_CLASS(FileSystemDock);
+	GDREGISTER_ABSTRACT_CLASS(InspectorDock);
 	GDREGISTER_VIRTUAL_CLASS(EditorFileSystemImportFormatSupportQuery);
 
 	GDREGISTER_CLASS(EditorScenePostImport);

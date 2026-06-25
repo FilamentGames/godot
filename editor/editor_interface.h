@@ -48,6 +48,7 @@ class EditorSettings;
 class EditorToaster;
 class EditorUndoRedoManager;
 class FileSystemDock;
+class InspectorDock;
 class Mesh;
 class Node;
 class PropertySelector;
@@ -164,6 +165,7 @@ public:
 	String get_current_directory() const;
 
 	EditorInspector *get_inspector() const;
+	InspectorDock *get_inspector_dock() const;
 
 	// Object/Resource/Node editing.
 

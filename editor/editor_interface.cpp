@@ -672,6 +672,10 @@ EditorInspector *EditorInterface::get_inspector() const {
 	return InspectorDock::get_inspector_singleton();
 }
 
+InspectorDock *EditorInterface::get_inspector_dock() const {
+	return InspectorDock::get_singleton();
+}
+
 // Object/Resource/Node editing.
 
 void EditorInterface::inspect_object(Object *p_obj, const String &p_for_property, bool p_inspector_only) {
@@ -893,6 +897,7 @@ void EditorInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_current_path"), &EditorInterface::get_current_path);
 	ClassDB::bind_method(D_METHOD("get_current_directory"), &EditorInterface::get_current_directory);
 
+	ClassDB::bind_method(D_METHOD("get_inspector_dock"), &EditorInterface::get_inspector_dock); // added for Baby Godot
 	ClassDB::bind_method(D_METHOD("get_inspector"), &EditorInterface::get_inspector);
 
 	// Object/Resource/Node editing.
