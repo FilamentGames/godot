@@ -9,9 +9,11 @@ if [ -z "${EMSDK:-}" ]; then
     exit 1
 fi
 
-if [ -d "./bin" ]; then
-    echo "Removing existing bin directory..."
-    rm -rf ./bin
+if [[ "${1:-}" == "-c" ]]; then
+    if [ -d "./bin" ]; then
+        echo "Removing existing bin directory..."
+        rm -rf ./bin
+    fi
 fi
 
 EMSDK="${EMSDK%/}"
