@@ -3,22 +3,33 @@
 set -eou pipefail
 
 # Requires a manually-set Env Var for the EMSDK Path
-if [ -z "$EMSDK" ]; then
+if [ -z "${EMSDK:-}" ]; then
     echo "EMSDK environment variable is not set."
     echo "Please set the EMSDK environment variable to the root of the Emscripten SDK Folder."
     exit 1
 fi
 
+if [ -d "./bin" ]; then
+    echo "Removing existing bin directory..."
+    rm -rf ./bin
+fi
+
+EMSDK="${EMSDK%/}"
+
 echo "Activating Emscripten At Path: $EMSDK"
 
-# shellcheck source=/dev/null
 "$EMSDK/emsdk" install latest
-# shellcheck source=/dev/null
 "$EMSDK/emsdk" activate latest
 # shellcheck source=/dev/null
-"$EMSDK/emsdk_env.sh"
+source "$EMSDK/emsdk_env.sh"
 
-echo "Emscripten Activated"
+if ! command -v emcc >/dev/null 2>&1; then
+    echo "Emscripten activation failed: emcc is not on PATH."
+    echo "Ensure EMSDK points to a valid Emscripten SDK root and that emsdk_env.sh ran successfully."
+    exit 1
+fi
+
+echo "Emscripten Activated ($(emcc -v 2>&1 | head -n1))"
 
 echo "Building Godot Editor..."
 scons \
