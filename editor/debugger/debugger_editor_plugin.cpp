@@ -56,7 +56,8 @@ DebuggerEditorPlugin::DebuggerEditorPlugin(PopupMenu *p_debug_menu) {
 	file_server = memnew(EditorFileServer);
 
 	EditorDebuggerNode *debugger = memnew(EditorDebuggerNode);
-	//EditorDockManager::get_singleton()->add_dock(debugger);
+	EditorDockManager::get_singleton()->add_dock(debugger);
+	debugger->close(); // Debugger needs to be added as a dock BUT we want to hide it, so call EditorDock::close() on it immediately.
 
 	// Main editor debug menu.
 	debug_menu = p_debug_menu;
