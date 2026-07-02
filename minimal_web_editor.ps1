@@ -33,7 +33,8 @@ Write-Host "Activating Emscripten At Path: $env:EMSDK`n"
 
 Write-Host "`nEmscripten Activated`n"
 
-$devBuild = $args -contains "-dev"
+$devBuild = $args -contains "--dev"
+$cleanBuild = $args -contains "--clean"
 if ($devBuild) {
     $production = "no"
     $optimize = "none"
@@ -44,18 +45,29 @@ if ($devBuild) {
     Write-Host "Building Godot Editor...`n"
 }
 
-scons `
-    platform=web `
-    target=editor `
-    production=$production `
-    optimize=$optimize `
-    deprecated=false `
-    disable_xr=true `
-    disable_overrides=true `
-    engine_update_check=false `
-    cache_path=".cache" `
-    cache_limit=10 `
-    modules_enabled_by_default=false `
-    build_profile=profile.gdbuild
+$sconsArgs = @(
+    "platform=web",
+    "target=editor",
+    "production=$production",
+    "optimize=$optimize",
+    "deprecated=false",
+    "disable_xr=true",
+    "disable_overrides=true",
+    "engine_update_check=false",
+    "cache_path=.cache",
+    "cache_limit=10",
+    "modules_enabled_by_default=false",
+    "build_profile=profile.gdbuild"
+)
+
+if ($cleanBuild) {
+    Write-Host "Cleaning previous build...`n"
+    scons --clean @sconsArgs
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+}
+
+scons @sconsArgs
 
 npx brotli-cli compress -q 5 --br=false bin\.web_zip\godot.editor.wasm
