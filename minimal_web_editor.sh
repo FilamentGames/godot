@@ -28,13 +28,6 @@ if [ -z "${EMSDK:-}" ]; then
     exit 1
 fi
 
-if [[ "${1:-}" == "-c" ]]; then
-    if [ -d "./bin" ]; then
-        echo "Removing existing bin directory..."
-        rm -rf ./bin
-    fi
-fi
-
 EMSDK="${EMSDK%/}"
 
 echo "Activating Emscripten At Path: $EMSDK"
@@ -53,11 +46,12 @@ fi
 echo "Emscripten Activated ($(emcc -v 2>&1 | head -n1))"
 
 dev_build=false
+clean_build=false
 for arg in "$@"; do
-    if [[ "$arg" == "-dev" ]]; then
-        dev_build=true
-        break
-    fi
+    case "$arg" in
+        --dev) dev_build=true ;;
+        --clean) clean_build=true ;;
+    esac
 done
 
 if [[ "$dev_build" == true ]]; then
@@ -70,18 +64,26 @@ else
     echo "Building Godot Editor..."
 fi
 
-scons \
-    platform=web \
-    target=editor \
-    production="$production" \
-    optimize="$optimize" \
-    deprecated=false \
-    disable_xr=true \
-    disable_overrides=true \
-    engine_update_check=false \
-    cache_path=".cache" \
-    cache_limit=10 \
-    modules_enabled_by_default=false \
+scons_args=(
+    platform=web
+    target=editor
+    production="$production"
+    optimize="$optimize"
+    deprecated=false
+    disable_xr=true
+    disable_overrides=true
+    engine_update_check=false
+    cache_path=.cache
+    cache_limit=10
+    modules_enabled_by_default=false
     build_profile=profile.gdbuild
+)
+
+if [[ "$clean_build" == true ]]; then
+    echo "Cleaning previous build..."
+    scons --clean "${scons_args[@]}"
+fi
+
+scons "${scons_args[@]}"
 
 npx brotli-cli compress -q 5 --br=false bin/.web_zip/godot.editor.wasm
