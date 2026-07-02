@@ -38,7 +38,7 @@ $cleanBuild = $args -contains "--clean"
 if ($devBuild) {
     $production = "no"
     $optimize = "none"
-    Write-Host "Building Godot Editor (dev: production=no, optimize=none)...`n"
+    Write-Host "Building Godot Editor (dev: debug_symbols=yes, use_assertions=yes, lto=none, optimize=speed_trace)...`n"
 } else {
     $production = "yes"
     $optimize = "size_extra"
@@ -59,6 +59,10 @@ $sconsArgs = @(
     "modules_enabled_by_default=false",
     "build_profile=profile.gdbuild"
 )
+
+if ($devBuild) {
+    $sconsArgs += @("debug_symbols=yes", "use_assertions=yes", "lto=none")
+}
 
 if ($cleanBuild) {
     Write-Host "Cleaning previous build...`n"
