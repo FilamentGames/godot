@@ -2,6 +2,25 @@
 
 set -eou pipefail
 
+if command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+elif command -v python >/dev/null 2>&1; then
+    PYTHON=python
+else
+    echo "Python is not installed or not on PATH."
+    exit 1
+fi
+
+echo "Python: $($PYTHON --version)"
+
+if ! command -v scons >/dev/null 2>&1; then
+    echo "SCons not found. Installing via pip..."
+    "$PYTHON" -m pip install scons
+fi
+
+echo "SCons: $(scons --version 2>&1 | head -n1)"
+echo
+
 # Requires a manually-set Env Var for the EMSDK Path
 if [ -z "${EMSDK:-}" ]; then
     echo "EMSDK environment variable is not set."
