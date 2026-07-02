@@ -766,6 +766,9 @@ void SceneTreeEditor::_update_visibility_color(Node *p_node, TreeItem *p_item) {
 			color.a = 0.6;
 		}
 		int idx = p_item->get_button_by_id(0, BUTTON_VISIBILITY);
+		if (idx == -1) {
+			return;
+		}
 		p_item->set_button_color(0, idx, color);
 	}
 }
