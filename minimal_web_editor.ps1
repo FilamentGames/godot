@@ -33,12 +33,22 @@ Write-Host "Activating Emscripten At Path: $env:EMSDK`n"
 
 Write-Host "`nEmscripten Activated`n"
 
-Write-Host "Building Godot Editor...`n"
+$devBuild = $args -contains "-dev"
+if ($devBuild) {
+    $production = "no"
+    $optimize = "none"
+    Write-Host "Building Godot Editor (dev: production=no, optimize=none)...`n"
+} else {
+    $production = "yes"
+    $optimize = "size_extra"
+    Write-Host "Building Godot Editor...`n"
+}
+
 scons `
     platform=web `
     target=editor `
-    production=yes `
-    optimize=size_extra `
+    production=$production `
+    optimize=$optimize `
     deprecated=false `
     disable_xr=true `
     disable_overrides=true `
