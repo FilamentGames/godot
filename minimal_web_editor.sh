@@ -29,11 +29,13 @@ if [ -z "${EMSDK:-}" ]; then
 fi
 
 EMSDK="${EMSDK%/}"
+EMSCRIPTEN_VERSION="${EMSCRIPTEN_VERSION:-4.0.11}"
 
 echo "Activating Emscripten At Path: $EMSDK"
+echo "Emscripten Version: $EMSCRIPTEN_VERSION"
 
-"$EMSDK/emsdk" install latest
-"$EMSDK/emsdk" activate latest
+"$EMSDK/emsdk" install "$EMSCRIPTEN_VERSION"
+"$EMSDK/emsdk" activate "$EMSCRIPTEN_VERSION"
 # shellcheck source=/dev/null
 source "$EMSDK/emsdk_env.sh"
 
@@ -84,6 +86,10 @@ if [[ "$dev_build" == true ]]; then
         debug_symbols=yes
         use_assertions=yes
         lto=none
+    )
+else
+    scons_args+=(
+        use_closure_compiler=yes
     )
 fi
 
