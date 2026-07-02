@@ -57,7 +57,7 @@ done
 if [[ "$dev_build" == true ]]; then
     production=no
     optimize=none
-    echo "Building Godot Editor (dev: production=no, optimize=none)..."
+    echo "Building Godot Editor (dev: debug_symbols=yes, use_assertions=yes, lto=none, optimize=speed_trace)..."
 else
     production=yes
     optimize=size_extra
@@ -78,6 +78,14 @@ scons_args=(
     modules_enabled_by_default=false
     build_profile=profile.gdbuild
 )
+
+if [[ "$dev_build" == true ]]; then
+    scons_args+=(
+        debug_symbols=yes
+        use_assertions=yes
+        lto=none
+    )
+fi
 
 if [[ "$clean_build" == true ]]; then
     echo "Cleaning previous build..."
