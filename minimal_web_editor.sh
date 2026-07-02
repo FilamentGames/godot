@@ -52,12 +52,29 @@ fi
 
 echo "Emscripten Activated ($(emcc -v 2>&1 | head -n1))"
 
-echo "Building Godot Editor..."
+dev_build=false
+for arg in "$@"; do
+    if [[ "$arg" == "-dev" ]]; then
+        dev_build=true
+        break
+    fi
+done
+
+if [[ "$dev_build" == true ]]; then
+    production=no
+    optimize=none
+    echo "Building Godot Editor (dev: production=no, optimize=none)..."
+else
+    production=yes
+    optimize=size_extra
+    echo "Building Godot Editor..."
+fi
+
 scons \
     platform=web \
     target=editor \
-    production=yes \
-    optimize=size_extra \
+    production="$production" \
+    optimize="$optimize" \
     deprecated=false \
     disable_xr=true \
     disable_overrides=true \
