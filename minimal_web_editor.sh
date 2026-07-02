@@ -13,12 +13,12 @@ fi
 
 echo "Python: $($PYTHON --version)"
 
-if ! command -v scons >/dev/null 2>&1; then
+if ! "$PYTHON" -m SCons --version >/dev/null 2>&1; then
     echo "SCons not found. Installing via pip..."
     "$PYTHON" -m pip install scons
 fi
 
-echo "SCons: $(scons --version 2>&1 | head -n1)"
+echo "SCons: $("$PYTHON" -m SCons --version 2>&1 | head -n1)"
 echo
 
 # Requires a manually-set Env Var for the EMSDK Path
@@ -89,9 +89,9 @@ fi
 
 if [[ "$clean_build" == true ]]; then
     echo "Cleaning previous build..."
-    scons --clean "${scons_args[@]}"
+    "$PYTHON" -m SCons --clean "${scons_args[@]}"
 fi
 
-scons "${scons_args[@]}"
+"$PYTHON" -m SCons "${scons_args[@]}"
 
 npx brotli-cli compress -q 5 --br=false bin/.web_zip/godot.editor.wasm
