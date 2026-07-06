@@ -3594,11 +3594,11 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, const Vect
 				cursor_item = cursor_item->get_parent();
 			}
 
-			if (is_item_in_favorites) {
-				p_popup->add_separator();
-				added_separator = true;
-				p_popup->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTRC("Show in FileSystem"), FILE_MENU_SHOW_IN_FILESYSTEM);
-			}
+			// if (is_item_in_favorites) {
+			// 	p_popup->add_separator();
+			// 	added_separator = true;
+			// 	p_popup->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTRC("Show in FileSystem"), FILE_MENU_SHOW_IN_FILESYSTEM);
+			// }
 		}
 
 #if !defined(ANDROID_ENABLED) && !defined(WEB_ENABLED)

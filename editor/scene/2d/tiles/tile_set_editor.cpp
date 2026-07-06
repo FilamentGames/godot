@@ -458,7 +458,7 @@ void TileSetEditor::_tile_set_changed() {
 
 void TileSetEditor::_tab_changed(int p_tab_changed) {
 	split_container->set_visible(p_tab_changed == 0);
-	patterns_mc->set_visible(p_tab_changed == 1);
+	//patterns_mc->set_visible(p_tab_changed == 1);
 }
 
 void TileSetEditor::_move_tile_set_array_element(Object *p_undo_redo, Object *p_edited, const String &p_array_prefix, int p_from_index, int p_to_pos) {
@@ -828,17 +828,18 @@ TileSetEditor::TileSetEditor() {
 	tabs_bar->set_tab_alignment(TabBar::ALIGNMENT_CENTER);
 	tabs_bar->set_clip_tabs(false);
 	tabs_bar->add_tab(TTR("Tile Sources"));
-	tabs_bar->add_tab(TTR("Patterns"));
+	//tabs_bar->add_tab(TTR("Patterns"));
 	tabs_bar->connect("tab_changed", callable_mp(this, &TileSetEditor::_tab_changed));
 
-	tile_set_toolbar = memnew(HBoxContainer);
-	tile_set_toolbar->set_h_size_flags(SIZE_EXPAND_FILL);
+	// tile_set_toolbar = memnew(HBoxContainer);
+	// tile_set_toolbar->set_h_size_flags(SIZE_EXPAND_FILL);
 
-	PanelContainer *tabs_panel = memnew(PanelContainer);
-	tabs_panel->set_theme_type_variation("PanelContainerTabbarInner");
-	tabs_panel->add_child(tabs_bar);
-	tile_set_toolbar->add_child(tabs_panel);
-	main_vb->add_child(tile_set_toolbar);
+	// PanelContainer *tabs_panel = memnew(PanelContainer);
+	// tabs_panel->set_theme_type_variation("PanelContainerTabbarInner");
+	// tabs_panel->add_child(tabs_bar);
+	// tile_set_toolbar->add_child(tabs_panel);
+	// tile_set_toolbar->hide();
+	// main_vb->add_child(tile_set_toolbar);
 
 	//// Tiles ////
 	// Split container.
