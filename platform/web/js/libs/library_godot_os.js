@@ -334,6 +334,16 @@ const GodotOS = {
 		return 1;
 	},
 
+	godot_js_os_request_game_quit__proxy: 'sync',
+	godot_js_os_request_game_quit__sig: 'i',
+	godot_js_os_request_game_quit: function () {
+		if (typeof globalThis['godotRequestGameQuit'] === 'function') {
+			globalThis['godotRequestGameQuit']();
+			return 0;
+		}
+		return 1;
+	},
+
 	godot_js_os_shell_open__proxy: 'sync',
 	godot_js_os_shell_open__sig: 'vi',
 	godot_js_os_shell_open: function (p_uri) {

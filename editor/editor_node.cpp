@@ -7866,7 +7866,7 @@ void EditorNode::_feature_profile_changed() {
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_3D, false);
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_SCRIPT, false);
 		if (!Engine::get_singleton()->is_recovery_mode_hint()) {
-			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_GAME, false);
+			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_GAME, true);
 		}
 		if (AssetLibraryEditorPlugin::is_available()) {
 			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_ASSETLIB, false);
@@ -7880,7 +7880,7 @@ void EditorNode::_feature_profile_changed() {
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_3D, false);
 		editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_SCRIPT, false);
 		if (!Engine::get_singleton()->is_recovery_mode_hint()) {
-			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_GAME, false);
+			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_GAME, true);
 		}
 		if (AssetLibraryEditorPlugin::is_available()) {
 			editor_main_screen->set_button_enabled(EditorMainScreen::EDITOR_ASSETLIB, false);

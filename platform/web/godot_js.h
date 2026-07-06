@@ -134,6 +134,15 @@ extern int godot_js_display_tts_available();
 extern void godot_js_display_vk_cb(void (*p_input)(const char *p_text, int p_cursor));
 extern void godot_js_display_vk_show(const char *p_text, int p_type, int p_start, int p_end);
 extern void godot_js_display_vk_hide();
+// Web editor: stop the separately loaded game WASM instance (see editor.html).
+extern int godot_js_os_request_game_quit();
+
+// Web editor: position the game overlay over the Game View panel (see editor.html).
+// Rects are given in the editor canvas's coordinate space (device pixels); the JS side
+// maps them to CSS pixels using the canvas's bounding rect and scale.
+extern void godot_js_game_embed_show(int p_x, int p_y, int p_w, int p_h);
+extern void godot_js_game_embed_update(int p_x, int p_y, int p_w, int p_h);
+extern void godot_js_game_embed_hide();
 
 #ifdef __cplusplus
 }

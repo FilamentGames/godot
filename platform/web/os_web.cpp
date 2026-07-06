@@ -122,10 +122,16 @@ Error OS_Web::create_process(const String &p_path, const List<String> &p_argumen
 	String json_args = Variant(args).to_json_string();
 	int failed = godot_js_os_execute(json_args.utf8().get_data());
 	ERR_FAIL_COND_V_MSG(failed, ERR_UNAVAILABLE, "OS::execute() or create_process() must be implemented in Web via 'engine.setOnExecute' if required.");
+	if (r_child_id) {
+		*r_child_id = 1;
+	}
 	return OK;
 }
 
 Error OS_Web::kill(const ProcessID &p_pid) {
+	if (godot_js_os_request_game_quit() == 0) {
+		return OK;
+	}
 	ERR_FAIL_V_MSG(ERR_UNAVAILABLE, "OS::kill() is not available on the Web platform.");
 }
 
@@ -134,7 +140,12 @@ int OS_Web::get_process_id() const {
 }
 
 bool OS_Web::is_process_running(const ProcessID &p_pid) const {
-	return false;
+	if (p_pid == 0) {
+		return false;
+	}
+	return EM_ASM_INT({
+		return globalThis['__godotGameRtEnv'] ? 1 : 0;
+	}) != 0;
 }
 
 int OS_Web::get_process_exit_code(const ProcessID &p_pid) const {
