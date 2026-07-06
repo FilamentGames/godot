@@ -654,7 +654,9 @@ void EditorDockManager::close_dock(EditorDock *p_dock) {
 
 void EditorDockManager::open_dock(EditorDock *p_dock, bool p_set_current) {
 	ERR_FAIL_NULL(p_dock);
-	ERR_FAIL_COND_MSG(!all_docks.has(p_dock), vformat("Cannot open unknown dock '%s'.", p_dock->get_display_title()));
+	if (!all_docks.has(p_dock)) {
+		return;
+	}
 
 	if (p_dock->is_open) {
 		// Show the dock if it is already open.
@@ -717,7 +719,9 @@ void EditorDockManager::_make_dock_visible(EditorDock *p_dock, bool p_grab_focus
 
 void EditorDockManager::focus_dock(EditorDock *p_dock) {
 	ERR_FAIL_NULL(p_dock);
-	ERR_FAIL_COND_MSG(!all_docks.has(p_dock), vformat("Cannot focus unknown dock '%s'.", p_dock->get_display_title()));
+	if (!all_docks.has(p_dock)) {
+		return;
+	}
 
 	if (!p_dock->enabled) {
 		return;

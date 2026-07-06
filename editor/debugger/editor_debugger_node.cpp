@@ -38,7 +38,6 @@
 #include "editor/debugger/editor_debugger_plugin.h"
 #include "editor/debugger/editor_debugger_tree.h"
 #include "editor/debugger/script_editor_debugger.h"
-#include "editor/docks/editor_dock_manager.h"
 #include "editor/docks/inspector_dock.h"
 #include "editor/docks/scene_tree_dock.h"
 #include "editor/editor_log.h"
@@ -576,9 +575,6 @@ void EditorDebuggerNode::set_script_debug_button(MenuButton *p_button) {
 void EditorDebuggerNode::_break_state_changed() {
 	const bool breaked = get_current_debugger()->is_breaked();
 	const bool can_debug = get_current_debugger()->is_debuggable();
-	if (breaked) { // Show debugger.
-		EditorDockManager::get_singleton()->focus_dock(this);
-	}
 
 	// Update script menu.
 	if (!script_menu) {
