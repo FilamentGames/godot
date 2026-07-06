@@ -7675,7 +7675,10 @@ void EditorNode::_feature_profile_changed() {
 		//editor_dock_manager->set_dock_enabled(SignalsDock::get_singleton(), !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_SIGNALS_DOCK));
 		//editor_dock_manager->set_dock_enabled(GroupsDock::get_singleton(), !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_GROUPS_DOCK));
 		// The Import dock is useless without the FileSystem dock. Ensure the configuration is valid.
+
+		//bool fs_dock_disabled = profile->is_feature_disabled(EditorFeatureProfile::FEATURE_FILESYSTEM_DOCK);
 		editor_dock_manager->set_dock_enabled(FileSystemDock::get_singleton(), false);
+
 		//editor_dock_manager->set_dock_enabled(ImportDock::get_singleton(), !fs_dock_disabled && !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_IMPORT_DOCK));
 		//editor_dock_manager->set_dock_enabled(history_dock, !profile->is_feature_disabled(EditorFeatureProfile::FEATURE_HISTORY_DOCK));
 
