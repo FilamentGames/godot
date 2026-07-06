@@ -369,10 +369,10 @@ void EditorResourcePicker::_update_menu_items() {
 			edit_menu->set_item_disabled(-1, force_allow_unique);
 		}
 
-		if (edited_resource->get_path().is_resource_file()) {
-			edit_menu->add_separator();
-			edit_menu->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTR("Show in FileSystem"), OBJ_MENU_SHOW_IN_FILE_SYSTEM);
-		}
+		// if (edited_resource->get_path().is_resource_file()) {
+		// 	edit_menu->add_separator();
+		// 	edit_menu->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTR("Show in FileSystem"), OBJ_MENU_SHOW_IN_FILE_SYSTEM);
+		// }
 	}
 
 	// Add options to copy/paste resource.

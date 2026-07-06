@@ -813,7 +813,8 @@ void EditorDockManager::register_dock_slot(DockTabContainer *p_tab_container) {
 	ERR_FAIL_NULL(p_tab_container);
 	dock_slots[p_tab_container->dock_slot] = p_tab_container;
 
-	p_tab_container->set_dock_context_popup(dock_context_popup);
+	// Disable the Dock pop-up menu.
+	//p_tab_container->set_dock_context_popup(dock_context_popup);
 	p_tab_container->connect("tab_changed", callable_mp(this, &EditorDockManager::_update_layout).unbind(1));
 	p_tab_container->connect("active_tab_rearranged", callable_mp(this, &EditorDockManager::_update_layout).unbind(1));
 }
