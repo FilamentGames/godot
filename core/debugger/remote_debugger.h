@@ -33,6 +33,7 @@
 #include "core/debugger/debugger_marshalls.h"
 #include "core/debugger/engine_debugger.h"
 #include "core/debugger/remote_debugger_peer.h"
+#include "core/input/input.h"
 #include "core/string/ustring.h"
 #include "core/variant/array.h"
 
@@ -85,6 +86,9 @@ private:
 
 	HashMap<Thread::ID, List<Message>> messages;
 	HashSet<Thread::ID> threads_in_break;
+	bool cooperative_break = false;
+	bool break_mouse_mode_saved = false;
+	Input::MouseMode break_mouse_mode = Input::MouseMode::MOUSE_MODE_VISIBLE;
 
 	void _poll_messages();
 	bool _has_messages();
@@ -106,6 +110,12 @@ private:
 	Error _profiler_capture(const String &p_cmd, const Array &p_data, bool &r_captured);
 	Error _core_capture(const String &p_cmd, const Array &p_data, bool &r_captured);
 	Error _try_capture(const String &p_name, const Array &p_data, bool &r_captured);
+
+	void _set_break_pause(bool p_paused);
+	void _enter_debug_break(bool p_can_continue, ScriptLanguage *p_script_lang);
+	void _exit_debug_break();
+	// Returns true when the debugger should resume execution.
+	bool _dispatch_debug_message(const String &p_command, const Array &p_data, ScriptLanguage *p_script_lang);
 
 public:
 	// Overrides

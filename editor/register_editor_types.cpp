@@ -237,9 +237,11 @@ void register_editor_types() {
 	EditorPlugins::add_by_type<ControlEditorPlugin>();
 	EditorPlugins::add_by_type<CPUParticles3DEditorPlugin>();
 	EditorPlugins::add_by_type<CurveEditorPlugin>();
+#if !defined(WEB_ENABLED)
 	if (!Engine::get_singleton()->is_recovery_mode_hint()) {
 		EditorPlugins::add_by_type<DebugAdapterServer>();
 	}
+#endif
 	EditorPlugins::add_by_type<EditorScriptPlugin>();
 	EditorPlugins::add_by_type<FontEditorPlugin>();
 	EditorPlugins::add_by_type<GPUParticles3DEditorPlugin>();

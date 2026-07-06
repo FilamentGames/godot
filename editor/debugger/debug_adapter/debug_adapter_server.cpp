@@ -79,6 +79,10 @@ void DebugAdapterServer::_notification(int p_what) {
 }
 
 void DebugAdapterServer::start() {
+#ifdef WEB_ENABLED
+	// TCP servers are unavailable in the browser; debugging uses webipc:// instead.
+	return;
+#endif
 	remote_port = (DebugAdapterServer::port_override > -1) ? DebugAdapterServer::port_override : (int)_EDITOR_GET("network/debug_adapter/remote_port");
 	const Error status = protocol.start(remote_port, IPAddress("127.0.0.1"));
 	if (status != OK) {

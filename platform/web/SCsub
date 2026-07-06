@@ -28,6 +28,7 @@ web_files = [
     "javascript_bridge_singleton.cpp",
     "web_main.cpp",
     "os_web.cpp",
+    "debugger/remote_debugger_peer_web.cpp",
 ]
 
 if env["target"] == "editor":
@@ -36,6 +37,7 @@ if env["target"] == "editor":
 sys_env = env.Clone()
 sys_env.AddJSLibraries([
     "js/libs/library_godot_audio.js",
+    "js/libs/library_godot_debug_ipc.js",
     "js/libs/library_godot_display.js",
     "js/libs/library_godot_emscripten.js",
     "js/libs/library_godot_fetch.js",

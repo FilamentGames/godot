@@ -41,6 +41,7 @@
 #include "core/math/expression.h"
 #include "core/object/class_db.h"
 #include "core/object/script_language.h"
+#include "core/os/main_loop.h"
 #include "core/os/os.h"
 #include "servers/display/display_server.h"
 
@@ -393,6 +394,230 @@ Array RemoteDebugger::_get_message() {
 	return msg;
 }
 
+void RemoteDebugger::_set_break_pause(bool p_paused) {
+	MainLoop *main_loop = OS::get_singleton()->get_main_loop();
+	if (main_loop && main_loop->is_class("SceneTree")) {
+		main_loop->set("paused", p_paused);
+	}
+}
+
+void RemoteDebugger::_enter_debug_break(bool p_can_continue, ScriptLanguage *p_script_lang) {
+	Array msg = {
+		p_can_continue,
+		p_script_lang ? p_script_lang->debug_get_error() : String(),
+		p_script_lang && (p_script_lang->debug_get_stack_level_count() > 0),
+		Thread::get_caller_id()
+	};
+	if (allow_focus_steal_fn) {
+		allow_focus_steal_fn();
+	}
+	send_message("debug_enter", msg);
+
+	if (Thread::is_main_thread()) {
+		break_mouse_mode = Input::get_singleton()->get_mouse_mode();
+		break_mouse_mode_saved = true;
+		if (break_mouse_mode != Input::MouseMode::MOUSE_MODE_VISIBLE) {
+			Input::get_singleton()->set_mouse_mode(Input::MouseMode::MOUSE_MODE_VISIBLE);
+		}
+		_set_break_pause(true);
+	}
+}
+
+void RemoteDebugger::_exit_debug_break() {
+	send_message("debug_exit", Array());
+
+	if (Thread::is_main_thread()) {
+		if (break_mouse_mode_saved && break_mouse_mode != Input::MouseMode::MOUSE_MODE_VISIBLE) {
+			Input::get_singleton()->set_mouse_mode(break_mouse_mode);
+		}
+		break_mouse_mode_saved = false;
+		_set_break_pause(false);
+	}
+
+	MutexLock mutex_lock(mutex);
+
+	if (!Thread::is_main_thread()) {
+		messages.erase(Thread::get_caller_id());
+	}
+
+	threads_in_break.erase(Thread::get_caller_id());
+	cooperative_break = false;
+}
+
+bool RemoteDebugger::_dispatch_debug_message(const String &p_command, const Array &p_data, ScriptLanguage *p_script_lang) {
+	if (p_command == "step") {
+		script_debugger->set_depth(-1);
+		script_debugger->set_lines_left(1);
+		return true;
+
+	} else if (p_command == "next") {
+		script_debugger->set_depth(0);
+		script_debugger->set_lines_left(1);
+		return true;
+
+	} else if (p_command == "out") {
+		script_debugger->set_depth(1);
+		script_debugger->set_lines_left(1);
+		return true;
+
+	} else if (p_command == "continue") {
+		script_debugger->set_depth(-1);
+		script_debugger->set_lines_left(-1);
+		return true;
+
+	} else if (p_command == "break") {
+		ERR_PRINT("Got break when already broke!");
+		return true;
+
+	} else if (p_command == "get_stack_dump") {
+		DebuggerMarshalls::ScriptStackDump dump;
+		if (p_script_lang) {
+			int slc = p_script_lang->debug_get_stack_level_count();
+			for (int i = 0; i < slc; i++) {
+				ScriptLanguage::StackInfo frame;
+				frame.file = p_script_lang->debug_get_stack_level_source(i);
+				frame.line = p_script_lang->debug_get_stack_level_line(i);
+				frame.func = p_script_lang->debug_get_stack_level_function(i);
+				dump.frames.push_back(frame);
+			}
+		}
+		send_message("stack_dump", dump.serialize());
+
+	} else if (p_command == "get_stack_frame_vars") {
+		ERR_FAIL_COND_V(p_data.size() != 1, false);
+		if (!p_script_lang) {
+			send_message("stack_frame_vars", Array{ 0 });
+			return false;
+		}
+		int lv = p_data[0];
+
+		List<String> members;
+		List<Variant> member_vals;
+		if (ScriptInstance *inst = p_script_lang->debug_get_stack_level_instance(lv)) {
+			members.push_back("self");
+			member_vals.push_back(inst->get_owner());
+		}
+		p_script_lang->debug_get_stack_level_members(lv, &members, &member_vals);
+		ERR_FAIL_COND_V(members.size() != member_vals.size(), false);
+
+		List<String> locals;
+		List<Variant> local_vals;
+		p_script_lang->debug_get_stack_level_locals(lv, &locals, &local_vals);
+		ERR_FAIL_COND_V(locals.size() != local_vals.size(), false);
+
+		List<String> globals;
+		List<Variant> globals_vals;
+		p_script_lang->debug_get_globals(&globals, &globals_vals);
+		ERR_FAIL_COND_V(globals.size() != globals_vals.size(), false);
+
+		Array var_size = { local_vals.size() + member_vals.size() + globals_vals.size() };
+		send_message("stack_frame_vars", var_size);
+		_send_stack_vars(locals, local_vals, 0);
+		_send_stack_vars(members, member_vals, 1);
+		_send_stack_vars(globals, globals_vals, 2);
+
+	} else if (p_command == "reload_scripts") {
+		script_paths_to_reload = p_data;
+	} else if (p_command == "reload_all_scripts") {
+		reload_all_scripts = true;
+	} else if (p_command == "breakpoint") {
+		ERR_FAIL_COND_V(p_data.size() < 3, false);
+		bool set = p_data[2];
+		if (set) {
+			script_debugger->insert_breakpoint(p_data[1], p_data[0]);
+		} else {
+			script_debugger->remove_breakpoint(p_data[1], p_data[0]);
+		}
+
+	} else if (p_command == "set_skip_breakpoints") {
+		ERR_FAIL_COND_V(p_data.is_empty(), false);
+		script_debugger->set_skip_breakpoints(p_data[0]);
+	} else if (p_command == "set_ignore_error_breaks") {
+		ERR_FAIL_COND_V(p_data.is_empty(), false);
+		script_debugger->set_ignore_error_breaks(p_data[0]);
+	} else if (p_command == "evaluate") {
+		ERR_FAIL_COND_V(p_data.size() < 2, false);
+		ERR_FAIL_COND_V(!p_script_lang, false);
+		String expression_str = p_data[0];
+		int frame = p_data[1];
+
+		ScriptInstance *breaked_instance = p_script_lang->debug_get_stack_level_instance(frame);
+		if (!breaked_instance) {
+			return true;
+		}
+
+		PackedStringArray input_names;
+		Array input_vals;
+
+		List<String> locals;
+		List<Variant> local_vals;
+		p_script_lang->debug_get_stack_level_locals(frame, &locals, &local_vals);
+		ERR_FAIL_COND_V(locals.size() != local_vals.size(), false);
+
+		for (const String &S : locals) {
+			input_names.append(S);
+		}
+
+		for (const Variant &V : local_vals) {
+			input_vals.append(V);
+		}
+
+		List<String> globals;
+		List<Variant> globals_vals;
+		p_script_lang->debug_get_globals(&globals, &globals_vals);
+		ERR_FAIL_COND_V(globals.size() != globals_vals.size(), false);
+
+		for (const String &S : globals) {
+			input_names.append(S);
+		}
+
+		for (const Variant &V : globals_vals) {
+			input_vals.append(V);
+		}
+
+		LocalVector<StringName> native_types;
+		ClassDB::get_class_list(native_types);
+		for (const StringName &class_name : native_types) {
+			if (!ClassDB::is_class_exposed(class_name) || !Engine::get_singleton()->has_singleton(class_name) || Engine::get_singleton()->is_singleton_editor_only(class_name)) {
+				continue;
+			}
+
+			input_names.append(class_name);
+			input_vals.append(Engine::get_singleton()->get_singleton_object(class_name));
+		}
+
+		LocalVector<StringName> user_types;
+		ScriptServer::get_global_class_list(user_types);
+		for (const StringName &class_name : user_types) {
+			String scr_path = ScriptServer::get_global_class_path(class_name);
+			Ref<Script> scr = ResourceLoader::load(scr_path, "Script");
+			ERR_CONTINUE_MSG(scr.is_null(), vformat(R"(Could not load the global class %s from resource path: "%s".)", class_name, scr_path));
+
+			input_names.append(class_name);
+			input_vals.append(scr);
+		}
+
+		Expression expression;
+		expression.parse(expression_str, input_names);
+		const Variant return_val = expression.execute(input_vals, breaked_instance->get_owner());
+
+		DebuggerMarshalls::ScriptStackVariable stvar;
+		stvar.name = expression_str;
+		stvar.value = return_val;
+		stvar.type = 3;
+
+		send_message("evaluation_return", stvar.serialize());
+	} else {
+		bool captured = false;
+		ERR_FAIL_COND_V(_try_capture(p_command, p_data, captured) != OK, false);
+		if (!captured) {
+			WARN_PRINT(vformat("Unknown message received from debugger: %s.", p_command));
+		}
+	}
+
+	return false;
+}
+
 void RemoteDebugger::debug(bool p_can_continue, bool p_is_error_breakpoint) {
 	//this function is called when there is a debugger break (bug on script)
 	//or when execution is paused from editor
@@ -410,33 +635,26 @@ void RemoteDebugger::debug(bool p_can_continue, bool p_is_error_breakpoint) {
 
 		ERR_FAIL_COND_MSG(!is_peer_connected(), "Script Debugger failed to connect, but being used anyway.");
 
-		if (!peer->can_block()) {
-			return; // Peer does not support blocking IO. We could at least send the error though.
+		if (threads_in_break.has(Thread::get_caller_id())) {
+			return;
 		}
 
 		threads_in_break.insert(Thread::get_caller_id());
 	}
 
 	ScriptLanguage *script_lang = script_debugger->get_break_language();
-	Array msg = {
-		p_can_continue,
-		script_lang ? script_lang->debug_get_error() : String(),
-		script_lang && (script_lang->debug_get_stack_level_count() > 0),
-		Thread::get_caller_id()
-	};
-	if (allow_focus_steal_fn) {
-		allow_focus_steal_fn();
-	}
-	send_message("debug_enter", msg);
+	_enter_debug_break(p_can_continue, script_lang);
 
-	Input::MouseMode mouse_mode = Input::MouseMode::MOUSE_MODE_VISIBLE;
-
-	if (Thread::is_main_thread()) {
-		mouse_mode = Input::get_singleton()->get_mouse_mode();
-		if (mouse_mode != Input::MouseMode::MOUSE_MODE_VISIBLE) {
-			Input::get_singleton()->set_mouse_mode(Input::MouseMode::MOUSE_MODE_VISIBLE);
+	if (!peer->can_block()) {
+		cooperative_break = true;
+		if (!Thread::is_main_thread()) {
+			MutexLock mutex_lock(mutex);
+			messages.insert(Thread::get_caller_id(), List<Message>());
 		}
-	} else {
+		return;
+	}
+
+	if (!Thread::is_main_thread()) {
 		MutexLock mutex_lock(mutex);
 		messages.insert(Thread::get_caller_id(), List<Message>());
 	}
@@ -453,175 +671,8 @@ void RemoteDebugger::debug(bool p_can_continue, bool p_is_error_breakpoint) {
 			ERR_CONTINUE(cmd[0].get_type() != Variant::STRING);
 			ERR_CONTINUE(cmd[1].get_type() != Variant::ARRAY);
 
-			String command = cmd[0];
-			Array data = cmd[1];
-
-			if (command == "step") {
-				script_debugger->set_depth(-1);
-				script_debugger->set_lines_left(1);
+			if (_dispatch_debug_message(cmd[0], cmd[1], script_lang)) {
 				break;
-
-			} else if (command == "next") {
-				script_debugger->set_depth(0);
-				script_debugger->set_lines_left(1);
-				break;
-
-			} else if (command == "out") {
-				script_debugger->set_depth(1);
-				script_debugger->set_lines_left(1);
-				break;
-
-			} else if (command == "continue") {
-				script_debugger->set_depth(-1);
-				script_debugger->set_lines_left(-1);
-				break;
-
-			} else if (command == "break") {
-				ERR_PRINT("Got break when already broke!");
-				break;
-
-			} else if (command == "get_stack_dump") {
-				DebuggerMarshalls::ScriptStackDump dump;
-				if (script_lang) {
-					int slc = script_lang->debug_get_stack_level_count();
-					for (int i = 0; i < slc; i++) {
-						ScriptLanguage::StackInfo frame;
-						frame.file = script_lang->debug_get_stack_level_source(i);
-						frame.line = script_lang->debug_get_stack_level_line(i);
-						frame.func = script_lang->debug_get_stack_level_function(i);
-						dump.frames.push_back(frame);
-					}
-				}
-				send_message("stack_dump", dump.serialize());
-
-			} else if (command == "get_stack_frame_vars") {
-				ERR_FAIL_COND(data.size() != 1);
-				if (!script_lang) {
-					send_message("stack_frame_vars", Array{ 0 });
-					continue;
-				}
-				int lv = data[0];
-
-				List<String> members;
-				List<Variant> member_vals;
-				if (ScriptInstance *inst = script_lang->debug_get_stack_level_instance(lv)) {
-					members.push_back("self");
-					member_vals.push_back(inst->get_owner());
-				}
-				script_lang->debug_get_stack_level_members(lv, &members, &member_vals);
-				ERR_FAIL_COND(members.size() != member_vals.size());
-
-				List<String> locals;
-				List<Variant> local_vals;
-				script_lang->debug_get_stack_level_locals(lv, &locals, &local_vals);
-				ERR_FAIL_COND(locals.size() != local_vals.size());
-
-				List<String> globals;
-				List<Variant> globals_vals;
-				script_lang->debug_get_globals(&globals, &globals_vals);
-				ERR_FAIL_COND(globals.size() != globals_vals.size());
-
-				Array var_size = { local_vals.size() + member_vals.size() + globals_vals.size() };
-				send_message("stack_frame_vars", var_size);
-				_send_stack_vars(locals, local_vals, 0);
-				_send_stack_vars(members, member_vals, 1);
-				_send_stack_vars(globals, globals_vals, 2);
-
-			} else if (command == "reload_scripts") {
-				script_paths_to_reload = data;
-			} else if (command == "reload_all_scripts") {
-				reload_all_scripts = true;
-			} else if (command == "breakpoint") {
-				ERR_FAIL_COND(data.size() < 3);
-				bool set = data[2];
-				if (set) {
-					script_debugger->insert_breakpoint(data[1], data[0]);
-				} else {
-					script_debugger->remove_breakpoint(data[1], data[0]);
-				}
-
-			} else if (command == "set_skip_breakpoints") {
-				ERR_FAIL_COND(data.is_empty());
-				script_debugger->set_skip_breakpoints(data[0]);
-			} else if (command == "set_ignore_error_breaks") {
-				ERR_FAIL_COND(data.is_empty());
-				script_debugger->set_ignore_error_breaks(data[0]);
-			} else if (command == "evaluate") {
-				String expression_str = data[0];
-				int frame = data[1];
-
-				ScriptInstance *breaked_instance = script_debugger->get_break_language()->debug_get_stack_level_instance(frame);
-				if (!breaked_instance) {
-					break;
-				}
-
-				PackedStringArray input_names;
-				Array input_vals;
-
-				List<String> locals;
-				List<Variant> local_vals;
-				script_debugger->get_break_language()->debug_get_stack_level_locals(frame, &locals, &local_vals);
-				ERR_FAIL_COND(locals.size() != local_vals.size());
-
-				for (const String &S : locals) {
-					input_names.append(S);
-				}
-
-				for (const Variant &V : local_vals) {
-					input_vals.append(V);
-				}
-
-				List<String> globals;
-				List<Variant> globals_vals;
-				script_debugger->get_break_language()->debug_get_globals(&globals, &globals_vals);
-				ERR_FAIL_COND(globals.size() != globals_vals.size());
-
-				for (const String &S : globals) {
-					input_names.append(S);
-				}
-
-				for (const Variant &V : globals_vals) {
-					input_vals.append(V);
-				}
-
-				LocalVector<StringName> native_types;
-				ClassDB::get_class_list(native_types);
-				for (const StringName &class_name : native_types) {
-					if (!ClassDB::is_class_exposed(class_name) || !Engine::get_singleton()->has_singleton(class_name) || Engine::get_singleton()->is_singleton_editor_only(class_name)) {
-						continue;
-					}
-
-					input_names.append(class_name);
-					input_vals.append(Engine::get_singleton()->get_singleton_object(class_name));
-				}
-
-				LocalVector<StringName> user_types;
-				ScriptServer::get_global_class_list(user_types);
-				for (const StringName &class_name : user_types) {
-					String scr_path = ScriptServer::get_global_class_path(class_name);
-					Ref<Script> scr = ResourceLoader::load(scr_path, "Script");
-					ERR_CONTINUE_MSG(scr.is_null(), vformat(R"(Could not load the global class %s from resource path: "%s".)", class_name, scr_path));
-
-					input_names.append(class_name);
-					input_vals.append(scr);
-				}
-
-				Expression expression;
-				expression.parse(expression_str, input_names);
-				const Variant return_val = expression.execute(input_vals, breaked_instance->get_owner());
-
-				DebuggerMarshalls::ScriptStackVariable stvar;
-				stvar.name = expression_str;
-				stvar.value = return_val;
-				stvar.type = 3;
-
-				send_message("evaluation_return", stvar.serialize());
-			} else {
-				bool captured = false;
-				ERR_CONTINUE(_try_capture(command, data, captured) != OK);
-				if (!captured) {
-					WARN_PRINT(vformat("Unknown message received from debugger: %s.", command));
-				}
 			}
 		} else {
 			OS::get_singleton()->delay_usec(10000);
@@ -632,35 +683,42 @@ void RemoteDebugger::debug(bool p_can_continue, bool p_is_error_breakpoint) {
 		}
 	}
 
-	send_message("debug_exit", Array());
-
-	if (Thread::is_main_thread() && mouse_mode != Input::MouseMode::MOUSE_MODE_VISIBLE) {
-		Input::get_singleton()->set_mouse_mode(mouse_mode);
-	}
-
-	{
-		MutexLock mutex_lock(mutex);
-
-		if (!Thread::is_main_thread()) {
-			messages.erase(Thread::get_caller_id());
-		}
-
-		threads_in_break.erase(Thread::get_caller_id());
-	}
+	_exit_debug_break();
 }
 
 void RemoteDebugger::poll_events(bool p_is_idle) {
+	bool in_cooperative_break = false;
 	{
 		MutexLock lock(mutex);
 		if (threads_in_break.has(Thread::get_caller_id())) {
-			// We're already in `RemoteDebugger::debug`, so messages should be handled there instead.
-			return;
+			if (!cooperative_break) {
+				// We're already in `RemoteDebugger::debug`, so messages should be handled there instead.
+				return;
+			}
+			in_cooperative_break = true;
 		}
 	}
 
 	flush_output();
 
 	_poll_messages();
+
+	if (in_cooperative_break) {
+		ScriptLanguage *script_lang = script_debugger->get_break_language();
+		while (_has_messages()) {
+			Array cmd = _get_message();
+
+			ERR_CONTINUE(cmd.size() != 2);
+			ERR_CONTINUE(cmd[0].get_type() != Variant::STRING);
+			ERR_CONTINUE(cmd[1].get_type() != Variant::ARRAY);
+
+			if (_dispatch_debug_message(cmd[0], cmd[1], script_lang)) {
+				_exit_debug_break();
+				break;
+			}
+		}
+		return;
+	}
 
 	while (_has_messages()) {
 		Array arr = _get_message();
