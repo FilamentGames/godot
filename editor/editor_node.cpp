@@ -9204,21 +9204,17 @@ EditorNode::EditorNode() {
 	// Dock numbers are based on DockSlot enum value + 1.
 	{
 		const String scene_key = SceneTreeDock::get_singleton()->get_effective_layout_key();
-		const String import_key = ImportDock::get_singleton()->get_effective_layout_key();
-		default_layout->set_value(docks_section, "dock_3", vformat("%s,%s", scene_key, import_key));
+		default_layout->set_value(docks_section, "dock_3", scene_key);
 		default_layout->set_value(docks_section, "dock_3_selected_tab_idx", 0);
 	}
 	{
 		const String filesystem_key = filesystem_dock->get_effective_layout_key();
-		const String history_key = history_dock->get_effective_layout_key();
-		default_layout->set_value(docks_section, "dock_4", vformat("%s,%s", filesystem_key, history_key));
+		default_layout->set_value(docks_section, "dock_4", filesystem_key);
 		default_layout->set_value(docks_section, "dock_4_selected_tab_idx", 0);
 	}
 	{
 		const String inspector_key = InspectorDock::get_singleton()->get_effective_layout_key();
-		const String signals_key = SignalsDock::get_singleton()->get_effective_layout_key();
-		const String groups_key = GroupsDock::get_singleton()->get_effective_layout_key();
-		default_layout->set_value(docks_section, "dock_5", vformat("%s,%s,%s", inspector_key, signals_key, groups_key));
+		default_layout->set_value(docks_section, "dock_5", inspector_key);
 		default_layout->set_value(docks_section, "dock_5_selected_tab_idx", 0);
 	}
 
