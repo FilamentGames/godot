@@ -28,11 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
+#include "debugger/remote_debugger_peer_web.h"
 #include "display_server_web.h"
 #include "godot_js.h"
 #include "os_web.h"
 
 #include "core/config/engine.h"
+#include "core/debugger/engine_debugger.h"
 #include "core/io/resource_loader.h"
 #include "core/os/main_loop.h"
 #include "core/os/os.h"
@@ -135,6 +137,10 @@ extern EMSCRIPTEN_KEEPALIVE int godot_web_main(int argc, char *argv[]) {
 	godot_init_profiler();
 
 	os = new OS_Web();
+
+	// Must be registered before `Main::setup()` calls `EngineDebugger::initialize()`
+	// with the `--remote-debug` URI.
+	EngineDebugger::register_uri_handler("webipc://", RemoteDebuggerPeerWeb::create);
 
 #ifdef TOOLS_ENABLED
 	WebToolsEditorPlugin::initialize();

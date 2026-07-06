@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  web_tools_editor_plugin.cpp                                           */
+/*  editor_debugger_server_web.cpp                                       */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,56 +28,41 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "web_tools_editor_plugin.h"
-
 #include "editor_debugger_server_web.h"
 
-#include "core/config/engine.h"
-#include "core/io/dir_access.h"
-#include "core/io/file_access.h"
-#include "core/object/callable_mp.h"
-#include "editor/debugger/editor_debugger_server.h"
-#include "editor/editor_node.h"
-#include "editor/export/project_zip_packer.h"
+#include "../debugger/remote_debugger_peer_web.h"
+#include "../godot_js.h"
 
-#include <emscripten/emscripten.h>
-
-// Web functions defined in library_godot_editor_tools.js
-extern "C" {
-extern void godot_js_os_download_buffer(const uint8_t *p_buf, int p_buf_size, const char *p_name, const char *p_mime);
+Ref<EditorDebuggerServer> EditorDebuggerServerWeb::create(const String &p_protocol) {
+	ERR_FAIL_COND_V(p_protocol != "webipc://", nullptr);
+	return memnew(EditorDebuggerServerWeb);
 }
 
-static void _web_editor_init_callback() {
-	EditorDebuggerServer::register_protocol_handler("webipc://", EditorDebuggerServerWeb::create);
-	EditorNode::get_singleton()->add_editor_plugin(memnew(WebToolsEditorPlugin));
+String EditorDebuggerServerWeb::get_uri() const {
+	return "webipc://local";
 }
 
-void WebToolsEditorPlugin::initialize() {
-	EditorNode::add_init_callback(_web_editor_init_callback);
+Error EditorDebuggerServerWeb::start(const String &p_uri) {
+	godot_js_debug_ipc_open("editor");
+	active = true;
+	return OK;
 }
 
-WebToolsEditorPlugin::WebToolsEditorPlugin() {
-	add_tool_menu_item("Download Project Source", callable_mp(this, &WebToolsEditorPlugin::_download_zip));
+void EditorDebuggerServerWeb::stop() {
+	godot_js_debug_ipc_close();
+	active = false;
 }
 
-void WebToolsEditorPlugin::_download_zip() {
-	if (!Engine::get_singleton() || !Engine::get_singleton()->is_editor_hint()) {
-		ERR_PRINT("Downloading the project as a ZIP archive is only available in Editor mode.");
-		return;
-	}
-	const String output_name = ProjectZIPPacker::get_project_zip_safe_name();
-	const String output_path = String("/tmp").path_join(output_name);
-	ProjectZIPPacker::pack_project_zip(output_path);
+bool EditorDebuggerServerWeb::is_active() const {
+	return active;
+}
 
-	{
-		Ref<FileAccess> f = FileAccess::open(output_path, FileAccess::READ);
-		ERR_FAIL_COND_MSG(f.is_null(), "Unable to create ZIP file.");
-		Vector<uint8_t> buf;
-		buf.resize(f->get_length());
-		f->get_buffer(buf.ptrw(), buf.size());
-		godot_js_os_download_buffer(buf.ptr(), buf.size(), output_name.utf8().get_data(), "application/zip");
-	}
+bool EditorDebuggerServerWeb::is_connection_available() const {
+	return active && godot_js_debug_ipc_is_connection_available();
+}
 
-	// Remove the temporary file since it was sent to the user's native filesystem as a download.
-	DirAccess::remove_file_or_error(output_path);
+Ref<RemoteDebuggerPeer> EditorDebuggerServerWeb::take_connection() {
+	ERR_FAIL_COND_V(!is_connection_available(), Ref<RemoteDebuggerPeer>());
+	godot_js_debug_ipc_accept();
+	return memnew(RemoteDebuggerPeerWeb("editor"));
 }
