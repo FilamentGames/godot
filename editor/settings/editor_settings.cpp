@@ -1105,7 +1105,13 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 		game_embed_mode_hints = "Disabled:-1,Auto (based on screen size):0,Enabled:1";
 	}
 #endif
+#ifdef WEB_ENABLED
+	// The web platform has no real window embedding, so "floating" and "per-project" don't
+	// apply; always target the Game View panel via `EmbeddedProcessWeb`'s DOM overlay.
+	int default_game_embed_mode = 1; // Embed Game.
+#else
 	int default_game_embed_mode = OS::get_singleton()->has_feature("xr_editor") ? -1 : 0;
+#endif
 	EDITOR_SETTING_BASIC(Variant::INT, PROPERTY_HINT_ENUM, "run/window_placement/game_embed_mode", default_game_embed_mode, game_embed_mode_hints);
 
 	// Auto save

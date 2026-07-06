@@ -126,7 +126,7 @@
 
 			/* Don't show distracting focus outlines for the main tabs' contents. */
 			#dialog-editor canvas:focus,
-			#dialog-game canvas:focus,
+			#game-overlay canvas:focus,
 			#canvas:focus,
 			#gameCanvas:focus {
 				outline: none;
@@ -248,19 +248,25 @@
 				padding: 0;
 			}
 
-			#dialog-game {
+			/* Positioned/sized from C++ via `godotGameEmbed` to track the Game View
+			   panel's embedded-process control, so it overlays the editor rather than
+			   covering the whole page. See `library_godot_game_embed.js`. */
+			#game-overlay {
+				display: none;
+				position: fixed;
 				background-color: black;
+				overflow: hidden;
+				z-index: 10;
 			}
 
-			#dialog-game-header {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 1rem;
+			#game-overlay.visible {
+				display: block;
 			}
 
-			#dialog-game-title {
-				margin: 0;
+			#game-overlay canvas {
+				display: block;
+				width: 100%;
+				height: 100%;
 			}
 		</style>
 	</head>
@@ -325,19 +331,12 @@
 					Please try updating or use a different browser.
 				</canvas>
 			</dialog>
-			<dialog id="dialog-game" aria-labelledby="dialog-game-title">
-				<div id="dialog-game-header">
-					<h3 id="dialog-game-title">Game</h3>
-					<button id="dialog-game-close" class="btn" type="button" aria-label="Close" onclick="hideGameDialog()">X</button>
-				</div>
-				<div id="dialog-game-content">
-					<canvas id="game-canvas">
-						HTML5 canvas appears to be unsupported in the current browser.<br >
-						Please try updating or use a different browser.
-					</canvas>
-				</div>
-				<div id="dialog-game-footer"></div>
-			</dialog>
+			<div id="game-overlay">
+				<canvas id="game-canvas">
+					HTML5 canvas appears to be unsupported in the current browser.<br >
+					Please try updating or use a different browser.
+				</canvas>
+			</div>
 			<dialog id="dialog-status">
 				<div id="status-progress" style="display: none;" oncontextmenu="event.preventDefault();">
 					<div id="status-progress-inner"></div>
@@ -435,6 +434,7 @@
 			let game = null;
 			let setStatusMode;
 			let setStatusNotice;
+			let lastGameEmbedRect = null;
 
 			function showStatusDialog() {
 				document.getElementById('dialog-status').showModal();
@@ -453,20 +453,67 @@
 				document.getElementById('dialog-editor').close();
 			}
 
-			function showGameDialog() {
-				document.getElementById('dialog-game').showModal();
+			// Positions/sizes `#game-overlay` over the Game View panel using the rect the
+			// editor reports (in its own canvas's buffer-pixel space) and reveals it.
+			// Called from `library_godot_game_embed.js` (see `godot_js_game_embed_show/update`).
+			function applyGameEmbedRect(x, y, w, h) {
+				lastGameEmbedRect = { x: x, y: y, w: w, h: h };
+				const overlay = document.getElementById('game-overlay');
+				const editorCanvas = document.getElementById('editor-canvas');
+				const gameCanvas = document.getElementById('game-canvas');
+				const canvasRect = editorCanvas.getBoundingClientRect();
+				const scaleX = editorCanvas.width > 0 ? canvasRect.width / editorCanvas.width : 1;
+				const scaleY = editorCanvas.height > 0 ? canvasRect.height / editorCanvas.height : 1;
+
+				overlay.style.left = `${canvasRect.left + (x * scaleX)}px`;
+				overlay.style.top = `${canvasRect.top + (y * scaleY)}px`;
+				overlay.style.width = `${w * scaleX}px`;
+				overlay.style.height = `${h * scaleY}px`;
+
+				gameCanvas.width = w;
+				gameCanvas.height = h;
+				gameCanvas.style.width = `${w * scaleX}px`;
+				gameCanvas.style.height = `${h * scaleY}px`;
 			}
 
-			function hideGameDialog() {
-				document.getElementById('dialog-game').close();
-				closeGame();
+			function restoreGameEmbedOverlay() {
+				if (lastGameEmbedRect) {
+					globalThis.godotGameEmbed.show(
+						lastGameEmbedRect.x,
+						lastGameEmbedRect.y,
+						lastGameEmbedRect.w,
+						lastGameEmbedRect.h
+					);
+				}
 			}
 
-			function closeGame() {
+			// Exposed to `library_godot_game_embed.js`. `update` also re-shows the overlay
+			// so a stale manual "Hide" is cleared out by the next layout-driven rect update.
+			globalThis.godotGameEmbed = {
+				show: function (x, y, w, h) {
+					applyGameEmbedRect(x, y, w, h);
+					document.getElementById('game-overlay').classList.add('visible');
+				},
+				update: function (x, y, w, h) {
+					applyGameEmbedRect(x, y, w, h);
+					document.getElementById('game-overlay').classList.add('visible');
+				},
+				hide: function () {
+					document.getElementById('game-overlay').classList.remove('visible');
+				},
+			};
+
+			function stopGame() {
 				if (game) {
 					game.requestQuit();
 				}
 			}
+
+			function closeGame() {
+				stopGame();
+			}
+
+			globalThis.godotRequestGameQuit = stopGame;
 
 			function closeEditor() { // eslint-disable-line no-unused-vars
 				closeGame();
@@ -510,10 +557,8 @@
 						editorCanvas.height = height * scale;
 						editorCanvas.style.width = `${width}px`;
 						editorCanvas.style.height = `${height}px`;
-						gameCanvas.width = width * scale / 2;
-						gameCanvas.height = height * scale / 2;
-						gameCanvas.style.width = `${width / 2}px`;
-						gameCanvas.style.height = `${height / 2}px`;
+						// `game-canvas` is sized/positioned by `applyGameEmbedRect`, driven by the
+						// editor's Game View panel rect rather than the full viewport.
 						lastScale = scale;
 						lastWidth = width;
 						lastHeight = height;
@@ -572,14 +617,44 @@
 					});
 				};
 
+				let pendingGameStart = null;
+
+				function startGameEmbedded(args) {
+					// The web editor runs the game in a DOM overlay on the same page. Use a
+					// placeholder window ID to mark the instance as embedded and force windowed
+					// mode (see `--wid` handling in `main.cpp`).
+					const gameArgs = args.concat(['--wid', '1']);
+					// The overlay is shown/positioned by `EmbeddedProcessWeb::embed_process`
+					// (via `godotGameEmbed.show`), which runs synchronously right after this.
+					game = new Engine(gameConfig);
+					game.init().then(function () {
+						requestAnimationFrame(function () {
+							game.start({ 'args': gameArgs, 'canvas': gameCanvas }).then(function () {
+								globalThis.__godotGameRtEnv = game.rtenv;
+								restoreGameEmbedOverlay();
+								gameCanvas.focus();
+							});
+						});
+					});
+				}
+
 				const gameConfig = {
 					'persistentPaths': persistentPaths,
 					'unloadAfterInit': false,
 					'canvas': gameCanvas,
 					'canvasResizePolicy': 0,
 					'onExit': function () {
-						hideGameDialog();
+						globalThis.__godotGameRtEnv = null;
+						const restarting = !!pendingGameStart;
+						if (!restarting) {
+							globalThis.godotGameEmbed.hide();
+						}
 						game = null;
+						if (pendingGameStart) {
+							const args = pendingGameStart;
+							pendingGameStart = null;
+							startGameEmbedded(args);
+						}
 					},
 				};
 
@@ -596,18 +671,11 @@
 
 					if (is_game) {
 						if (game) {
-							console.error('A game is already running. Close it first');
+							pendingGameStart = args;
+							game.requestQuit();
 							return;
 						}
-						game = new Engine(gameConfig);
-						showGameDialog();
-						game.init().then(function () {
-							requestAnimationFrame(function () {
-								game.start({ 'args': args, 'canvas': gameCanvas }).then(function () {
-									gameCanvas.focus();
-								});
-							});
-						});
+						startGameEmbedded(args);
 					} else { // New editor instances will be run in the same canvas. We want to wait for it to exit.
 						OnEditorExit = function (code) {
 							setTimeout(function () {
