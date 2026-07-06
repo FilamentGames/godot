@@ -210,7 +210,7 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_i
 
 		set_selected(n);
 
-		EditorDockManager::get_singleton()->focus_dock(GroupsDock::get_singleton());
+		//EditorDockManager::get_singleton()->focus_dock(GroupsDock::get_singleton());
 	} else if (p_id == BUTTON_UNIQUE) {
 		bool ask_before_revoking_unique_name = EDITOR_GET("docks/scene_tree/ask_before_revoking_unique_name");
 		revoke_node = n;
