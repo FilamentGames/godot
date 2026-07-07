@@ -158,7 +158,7 @@ Vector<TileMapLayerSubEditorPlugin::TabData> TileMapLayerEditorTilesPlugin::get_
 	toolbar_controls.push_back(tools_settings);
 	toolbar_controls.push_back(tools_settings_vsep);
 	tabs.push_back({ toolbar_controls, wide_toolbar, tiles_bottom_panel });
-	tabs.push_back({ toolbar_controls, wide_toolbar, patterns_mc });
+	//tabs.push_back({ toolbar_controls, wide_toolbar, patterns_mc });
 	return tabs;
 }
 
@@ -2477,6 +2477,9 @@ TileMapLayerEditorTilesPlugin::TileMapLayerEditorTilesPlugin() {
 	patterns_help_label->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);
 	patterns_help_label->set_anchors_and_offsets_preset(Control::PRESET_HCENTER_WIDE);
 	patterns_item_list->add_child(patterns_help_label);
+
+	tiles_bottom_panel->add_child(patterns_mc);
+	patterns_mc->hide();
 
 	// Update.
 	_update_source_display();
