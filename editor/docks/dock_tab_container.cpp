@@ -269,7 +269,7 @@ DockTabContainer::DockTabContainer(EditorDock::DockSlot p_slot) {
 	EditorNode::get_singleton()->get_gui_base()->add_child(drag_hint);
 
 	get_tab_bar()->set_switch_on_release(true);
-	get_tab_bar()->connect("tab_rmb_clicked", callable_mp(this, &DockTabContainer::_tab_rmb_clicked));
+	//get_tab_bar()->connect("tab_rmb_clicked", callable_mp(this, &DockTabContainer::_tab_rmb_clicked));
 }
 
 Rect2 SideDockTabContainer::get_floating_dock_rect(EditorDock *p_dock) {
