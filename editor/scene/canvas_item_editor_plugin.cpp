@@ -4279,12 +4279,15 @@ void CanvasItemEditor::_draw_locks_and_groups(Node *p_node, const Transform2D &p
 	}
 }
 
-void CanvasItemEditor::_draw_viewport() {
-	// Update the transform
+void CanvasItemEditor::_update_global_canvas_transform() {
 	transform = Transform2D();
 	transform.scale_basis(Size2(zoom, zoom));
 	transform.columns[2] = -view_offset * zoom;
 	EditorNode::get_singleton()->get_scene_root()->set_global_canvas_transform(transform);
+}
+
+void CanvasItemEditor::_draw_viewport() {
+	_update_global_canvas_transform();
 
 	_draw_grid();
 	_draw_ruler_tool();
@@ -5273,6 +5276,7 @@ void CanvasItemEditor::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("update_viewport"), &CanvasItemEditor::update_viewport);
 	ClassDB::bind_method(D_METHOD("center_at", "position"), &CanvasItemEditor::center_at);
+	ClassDB::bind_method(D_METHOD("set_viewport_focus", "position", "new_zoom"), &CanvasItemEditor::set_viewport_focus);
 
 	ClassDB::bind_method("_set_owner_for_node_and_children", &CanvasItemEditor::_set_owner_for_node_and_children);
 
@@ -6137,6 +6141,14 @@ CanvasItemEditor::CanvasItemEditor() {
 }
 
 CanvasItemEditor *CanvasItemEditor::singleton = nullptr;
+
+void CanvasItemEditor::set_viewport_focus(const Vector2 &position, real_t new_zoom) {
+	zoom = new_zoom;
+	view_offset = position - (get_size() / 2 / new_zoom); // The position of the camera is based from the top left corner, so center it. This value is also applied directly to the transform's origin, so we need to factor in the new zoom level too.
+
+	_update_global_canvas_transform();
+	zoom_widget->set_zoom(new_zoom);
+}
 
 void CanvasItemEditorPlugin::edit(Object *p_object) {
 	canvas_item_editor->edit(Object::cast_to<CanvasItem>(p_object));

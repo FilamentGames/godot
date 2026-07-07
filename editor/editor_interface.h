@@ -33,7 +33,9 @@
 #include "core/io/resource.h"
 #include "core/object/object.h"
 #include "core/object/script_language.h"
+#include "editor/scene/canvas_item_editor_plugin.h"
 
+class CanvasItemEditor;
 class Control;
 class CreateDialog;
 class EditorCommandPalette;
@@ -165,6 +167,8 @@ public:
 
 	EditorInspector *get_inspector() const;
 	InspectorDock *get_inspector_dock() const;
+
+	CanvasItemEditor *get_canvas_item_editor() const;
 
 	// Object/Resource/Node editing.
 

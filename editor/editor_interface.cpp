@@ -682,6 +682,10 @@ InspectorDock *EditorInterface::get_inspector_dock() const {
 	return InspectorDock::get_singleton();
 }
 
+CanvasItemEditor *EditorInterface::get_canvas_item_editor() const {
+	return CanvasItemEditor::get_singleton();
+}
+
 // Object/Resource/Node editing.
 
 void EditorInterface::inspect_object(Object *p_obj, const String &p_for_property, bool p_inspector_only) {
@@ -914,6 +918,7 @@ void EditorInterface::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_inspector_dock"), &EditorInterface::get_inspector_dock); // added for Baby Godot
 	ClassDB::bind_method(D_METHOD("get_inspector"), &EditorInterface::get_inspector);
+	ClassDB::bind_method(D_METHOD("get_canvas_item_editor"), &EditorInterface::get_canvas_item_editor); // added for Baby Godot
 
 	// Object/Resource/Node editing.
 

@@ -182,6 +182,8 @@ void register_editor_types() {
 	GDREGISTER_CLASS(EditorExportPlatformExtension);
 	GDREGISTER_ABSTRACT_CLASS(EditorExportPreset);
 
+	GDREGISTER_CLASS(CanvasItemEditor);
+
 	register_exporter_types();
 
 	GDREGISTER_CLASS(EditorResourceConversionPlugin);
