@@ -14,20 +14,49 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<meta name="msapplication-starturl" content="/latest">
 		<meta property="og:site_name" content="Godot Engine Web Editor">
-		<meta property="og:url" name="twitter:url" content="https://editor.godotengine.org/releases/latest/">
+		<meta property="og:url" name="twitter:url" content="https://editor.godotengine.org/releases/stable/">
 		<meta property="og:title" name="twitter:title" content="Free and open source 2D and 3D game engine">
 		<meta property="og:description" name="twitter:description" content="Use the Godot Engine editor directly in your web browser, without having to install anything.">
-		<meta property="og:image" name="twitter:image" content="https://godotengine.org/themes/godotengine/assets/og_image.png">
+		<meta property="og:image" name="twitter:image" content="https://godotengine.org/assets/share-image.webp">
 		<meta property="og:type" content="website">
 		<meta name="twitter:card" content="summary">
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="favicon.png">
 		<link rel="apple-touch-icon" type="image/png" href="favicon.png">
 		<link rel="manifest" href="manifest.json">
+		<link rel="preload" href="inter-regular.woff2" as="font" crossorigin="anonymous">
+		<link rel="preload" href="inter-bold.woff2" as="font" crossorigin="anonymous">
 		<title>Godot Engine Web Editor (___GODOT_VERSION___)</title>
 		<style>
-			*:focus {
+			/* Use Inter in the same configuration as used in the editor (e.g. alternate lowercase `l`). */
+			@font-face {
+				font-family: "Inter";
+				src: url("inter-regular.woff2");
+				font-weight: 400;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Inter";
+				src: url("inter-bold.woff2");
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			html,
+			body,
+			button,
+			input {
+				/* Apply a modern sans-serif font stack in case the Inter font fails to load. */
+				font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+				font-size: 14px;
+				font-feature-settings: "calt" 0, "ss04" 1, "tnum" 1;
+			}
+
+			*:focus-visible {
 				/* More visible outline for better keyboard navigation. */
-				outline: 0.125rem solid hsl(220, 100%, 62.5%);
+				outline: 0.1875rem solid #538dda;
 				/* Make the outline always appear above other elements. */
 				/* Otherwise, one of its sides can be hidden by tabs in the Download and More layouts. */
 				position: relative;
@@ -35,13 +64,17 @@
 
 			body {
 				touch-action: none;
-				font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 				margin: 0;
 				border: 0 none;
 				padding: 0;
+				font-size: 14px;
 				text-align: center;
-				background-color: #333b4f;
+				background-color: #262626;
 				overflow: hidden;
+			}
+
+			h2 {
+				font-size: 21px;
 			}
 
 			a {
@@ -59,7 +92,6 @@
 			}
 
 			.welcome-modal {
-				display: none;
 				position: fixed;
 				z-index: 1;
 				left: 0;
@@ -76,17 +108,15 @@
 			}
 
 			.welcome-modal-content {
-				background-color: #333b4f;
+				background-color: #262626;
 				box-shadow: 0 0.25rem 0.25rem hsla(0, 0%, 0%, 0.5);
 				line-height: 1.5;
 				max-width: 38rem;
 				margin: 4rem auto 0 auto;
 				color: white;
 				border-radius: 0.5rem;
-				padding: 1rem 1rem 2rem 1rem;
+				padding: 0.125rem 1.25rem 1.25rem 1.25rem;
 			}
-
-			
 
 			#canvas, #gameCanvas {
 				display: block;
@@ -103,37 +133,41 @@
 			}
 
 			.godot {
-				color: #e0e0e0;
-				background-color: #3b3943;
+				color: #d0d0d0;
+				background-color: #1b1b1b;
 				background-image: linear-gradient(to bottom, #403e48, #35333c);
-				border: 1px solid #45434e;
-				box-shadow: 0 0 1px 1px #2f2d35;
+				border: 1px solid #484848;
+				box-shadow: 0 0 1px 1px #141414;
 			}
 
 			.btn {
 				appearance: none;
-				color: #e0e0e0;
-				background-color: #262c3b;
-				border: 1px solid #202531;
-				padding: 0.5rem 1rem;
+				color: #d0d0d0;
+				background-color: #424242;
+				border: 1px solid #484848;
+				/* Vertically center button text. */
+				padding: 0.4375rem 0.5625rem 0.5rem;
 				margin: 0 0.5rem;
+				border-radius: 0.25rem;
 			}
 
 			.btn:not(:disabled):hover {
-				color: #e0e1e5;
-				border-color: #666c7b;
+				color: #e4e4e4;
+				background-color: #4d4d4d;
+				border-color: #535353;
 			}
 
 			.btn:active {
-				border-color: #699ce8;
-				color: #699ce8;
+				color: #e5e5e5;
+				background-color: #505050;
+				border-color: #565656;
 			}
 
 			.btn:disabled {
-				color: #aaa;
-				border-color: #242937;
+				color: #7f7f7f;
+				background-color: #3a3a3a;
+				border-color: #3a3a3a;
 			}
-
 
 			/* Status display */
 
@@ -239,16 +273,47 @@
 		>
 			<div class="welcome-modal-content">
 				<h2 id="welcome-modal-title" class="welcome-modal-title">Important - Please read before continuing</h2>
-				<div id="welcome-modal-missing-description">
+				<div id="welcome-modal-description">
+					<p>
+						The Godot Web Editor has some limitations compared to the native version.<br>
+						Its main focus is education and experimentation;
+						<strong>it is not recommended for production</strong>.
+					</p>
+					<p>
+						For a more optimal experience, <a
+							href="https://godotengine.org/download/"
+							target="_blank"
+							rel="noopener"
+						>download</a> the native Godot Editor.
+					</p>
+					<p>
+						Refer to the
+						<a
+							href="https://docs.godotengine.org/en/stable/tutorials/editor/using_the_web_editor.html"
+							target="_blank"
+							rel="noopener"
+						>Web editor documentation</a> for usage instructions and limitations.
+					</p>
+				</div>
+				<div id="welcome-modal-missing-description" style="display: none">
 					<p>
 						<strong>The following features required by the Godot Web Editor are missing:</strong>
 					</p>
 					<ul id="welcome-modal-missing-list">
 					</ul>
+					<p>
+						If you are self-hosting the web editor,
+						refer to
+						<a
+							href="https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html"
+							target="_blank"
+							rel="noopener"
+						>Exporting for the Web</a> for more information.
+					</p>
 				</div>
 				<div style="text-align: center">
-					<button id="welcome-modal-dismiss" class="btn" type="button" onclick="closeWelcomeModal()" style="margin-top: 1rem">
-						OK
+					<button id="welcome-modal-dismiss" class="btn" type="button" onclick="closeWelcomeModal(true)" style="margin-top: 1rem">
+						OK - Don't Show Again
 					</button>
 				</div>
 			</div>
@@ -265,7 +330,7 @@
 					<h3 id="dialog-game-title">Game</h3>
 					<button id="dialog-game-close" class="btn" type="button" aria-label="Close" onclick="hideGameDialog()">X</button>
 				</div>
-				<div id="dialog-game-content"><
+				<div id="dialog-game-content">
 					<canvas id="game-canvas">
 						HTML5 canvas appears to be unsupported in the current browser.<br >
 						Please try updating or use a different browser.
@@ -291,6 +356,13 @@
 			</dialog>
 		</div>
 		<script>
+			function startEditorFromProjectZip() {
+				// todo: see if the user has a saved project and load that instead
+				fetch('project.zip').then(response => response.arrayBuffer()).then(zip => {
+					startEditor(zip);
+				});
+			}
+
 			window.addEventListener('load', () => {
 				if ('serviceWorker' in navigator) {
 					try {
@@ -323,8 +395,10 @@
 				const missing = Engine.getMissingFeatures({
 					threads: ___GODOT_THREADS_ENABLED___,
 				});
+				const modal = document.getElementById('welcome-modal');
 				if (missing.length) {
 					// Display error dialog as threading support is required for the editor.
+					document.getElementById('welcome-modal-description').style.display = 'none';
 					document.getElementById('welcome-modal-missing-description').style.display = 'block';
 					document.getElementById('welcome-modal-dismiss').style.display = 'none';
 					const list = document.getElementById('welcome-modal-missing-list');
@@ -334,20 +408,25 @@
 						list.appendChild(node);
 					}
 
-					const modal = document.getElementById('welcome-modal');
-
+					modal.showModal();
+				} else if (localStorage.getItem('welcomeModalDismissed') !== 'true') {
 					modal.showModal();
 				} else {
-					// todo: see if the user has a saved project and load that instead
-					fetch('project.zip').then(response => response.arrayBuffer()).then(zip => {
-						startEditor(zip);
-					});
+					startEditorFromProjectZip();
 				}
 			});
 
-			function closeWelcomeModal() {
+			function closeWelcomeModal(dontShowAgain) { // eslint-disable-line no-unused-vars
 				document.getElementById('welcome-modal').close();
-				localStorage.setItem('welcomeModalDismissed', 'true');
+				if (dontShowAgain) {
+					localStorage.setItem('welcomeModalDismissed', 'true');
+				}
+				const missing = Engine.getMissingFeatures({
+					threads: ___GODOT_THREADS_ENABLED___,
+				});
+				if (!missing.length) {
+					startEditorFromProjectZip();
+				}
 			}
 		</script>
 		<script src="godot.editor.js"></script>
