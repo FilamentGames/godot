@@ -558,6 +558,8 @@ private:
 
 	void _set_owner_for_node_and_children(Node *p_node, Node *p_owner);
 
+	void _update_global_canvas_transform();
+
 	friend class CanvasItemEditorPlugin;
 
 protected:
@@ -627,6 +629,8 @@ public:
 	virtual CursorShape get_cursor_shape(const Point2 &p_pos) const override;
 
 	ThemePreviewMode get_theme_preview() const { return theme_preview; }
+
+	void set_viewport_focus(const Vector2 &position, real_t new_zoom);
 
 	EditorSelection *editor_selection = nullptr;
 
