@@ -813,11 +813,6 @@ void EditorDockManager::register_dock_slot(DockTabContainer *p_tab_container) {
 	ERR_FAIL_NULL(p_tab_container);
 	dock_slots[p_tab_container->dock_slot] = p_tab_container;
 
-	DockSlot slot;
-	slot.layout = p_layout;
-
-	slot.container = p_tab_container;
-
 	//	Disable the Dock pop-up menu.
 	//p_tab_container->set_popup(dock_context_popup);
 	//p_tab_container->connect("pre_popup_pressed", callable_mp(dock_context_popup, &DockContextPopup::select_current_dock_in_dock_slot).bind(p_dock_slot));
