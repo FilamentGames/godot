@@ -33,6 +33,7 @@
 #include "core/io/resource.h"
 #include "core/object/object.h"
 #include "core/object/script_language.h"
+#include "editor/docks/scene_tree_dock.h"
 #include "editor/scene/canvas_item_editor_plugin.h"
 
 class CanvasItemEditor;
@@ -167,6 +168,7 @@ public:
 
 	EditorInspector *get_inspector() const;
 	InspectorDock *get_inspector_dock() const;
+	SceneTreeDock *get_scene_tree_dock() const;
 
 	CanvasItemEditor *get_canvas_item_editor() const;
 
