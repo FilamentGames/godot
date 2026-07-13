@@ -228,6 +228,9 @@ class SceneTreeEditor : public Control {
 	void _update_ask_before_revoking_unique_name();
 	void _revoke_unique_name();
 
+	Vector<const Node*> editable_nodes; // Added for Baby Godot
+	void _get_babygodot_editable_nodes(const Node *scene_node);
+
 public:
 	// Public for use as signal callback.
 	void _update_tree(bool p_scroll_to_selected = false);
@@ -300,3 +303,5 @@ public:
 
 	SceneTreeDialog();
 };
+
+#define SCENE_TREE_EDITABLE_NODES_RESERVE 64

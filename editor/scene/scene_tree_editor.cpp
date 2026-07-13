@@ -966,6 +966,8 @@ void SceneTreeEditor::_update_tree(bool p_scroll_to_selected) {
 
 	last_hash = hash_djb2_one_64(0);
 
+	_get_babygodot_editable_nodes(scene_node);
+
 	if (node_cache.current_scene_id.is_valid()) {
 		// Handle pinning/unpinning the animation player only do this once per iteration.
 		Node *pinned_node = AnimationPlayerEditor::get_singleton()->get_editing_node();
@@ -1001,6 +1003,35 @@ void SceneTreeEditor::_update_tree(bool p_scroll_to_selected) {
 		_update_filter(nullptr, p_scroll_to_selected);
 	}
 }
+void SceneTreeEditor::_get_babygodot_editable_nodes(const Node *scene_node) {
+	if (!scene_node) {
+		return;
+	}
+	const Node *editable_scene_list_node = scene_node->get_node_or_null(NodePath("EditableNodeList"));
+	editable_nodes.clear();
+	if (!editable_scene_list_node) {
+		return;
+	}
+
+	bool has_nodes = false;
+	const Variant nodes = editable_scene_list_node->get("nodes", &has_nodes);
+	if (!has_nodes || !nodes.is_array()) {
+		return;
+	}
+
+	const Array nodes_list = nodes;
+	for (const Variant &variant : nodes_list) {
+		if (variant.get_type() != Variant::OBJECT) {
+			continue;
+		}
+		const Object *object = variant;
+		const Node *node = Object::cast_to<Node>(object);
+		if (node == nullptr) {
+			continue;
+		}
+		editable_nodes.push_back(node);
+	}
+}
 
 bool SceneTreeEditor::_update_filter(TreeItem *p_parent, bool p_scroll_to_selected) {
 	TreeItem *last_selected = nullptr;
@@ -1026,7 +1057,9 @@ bool SceneTreeEditor::_update_filter_helper(TreeItem *p_parent, bool p_scroll_to
 
 	// Now find other reasons to keep this Node, too.
 	PackedStringArray terms = filter.to_lower().split_spaces();
-	bool keep = _item_matches_all_terms(p_parent, terms);
+
+	// Have the editable_nodes list act as an additional filter so that the old filter still works
+	bool keep = _item_matches_all_terms(p_parent, terms) && (editable_nodes.is_empty() || editable_nodes.find(get_node(p_parent->get_metadata(0))) != -1);
 
 	bool selectable = keep;
 	bool is_root = p_parent == tree->get_root();
@@ -1091,7 +1124,7 @@ bool SceneTreeEditor::_update_filter_helper(TreeItem *p_parent, bool p_scroll_to
 
 		p_parent->set_selectable(0, true);
 	} else if (keep_for_children) {
-		p_parent->set_visible(!hide_filtered_out_parents || is_root);
+		p_parent->set_visible(!hide_filtered_out_parents); // Change for Baby Godot: Always show root
 
 		if (!p_parent->is_visible()) {
 			TreeItem *candidate_sibling = p_parent;
@@ -2104,21 +2137,8 @@ void SceneTreeEditor::set_auto_expand_selected(bool p_auto, bool p_update_settin
 }
 
 void SceneTreeEditor::set_hide_filtered_out_parents(bool p_hide, bool p_update_settings) {
-	if (p_hide == hide_filtered_out_parents) {
-		return;
-	}
-
-	if (p_update_settings) {
-		EditorSettings::get_singleton()->set("docks/scene_tree/hide_filtered_out_parents", p_hide);
-	}
-	hide_filtered_out_parents = p_hide;
-
-	if (hide_filtered_out_parents) {
-		_update_filter();
-	} else {
-		node_cache.force_update = true;
-		_update_tree();
-	}
+	// Disable hiding filtered out parents in the streamlined editor.
+	return;
 }
 
 void SceneTreeEditor::set_accessibility_warnings(bool p_enable, bool p_update_settings) {
@@ -2240,6 +2260,10 @@ SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_ope
 
 	script_types = memnew(LocalVector<StringName>);
 	ClassDB::get_inheriters_from_class("Script", *script_types);
+
+	editable_nodes.reserve(SCENE_TREE_EDITABLE_NODES_RESERVE);
+
+	hide_filtered_out_parents = false;
 }
 
 SceneTreeEditor::~SceneTreeEditor() {
