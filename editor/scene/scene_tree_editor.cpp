@@ -2270,6 +2270,10 @@ SceneTreeEditor::~SceneTreeEditor() {
 	memdelete(script_types);
 }
 
+bool SceneTreeEditor::can_select_node(const Node *p_node) const {
+	return editable_nodes.is_empty() || editable_nodes.find(p_node) != -1;
+}
+
 /******** DIALOG *********/
 
 void SceneTreeDialog::popup_scenetree_dialog(Node *p_selected_node, Node *p_marked_node, bool p_marked_node_selectable, bool p_marked_node_children_selectable) {

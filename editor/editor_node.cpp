@@ -3194,8 +3194,10 @@ void EditorNode::_edit_current(bool p_skip_foreign, bool p_skip_inspector_update
 		Node *current_node = Object::cast_to<Node>(current_obj);
 		ERR_FAIL_NULL(current_node);
 
-		InspectorDock::get_inspector_singleton()->edit(current_node);
-		if (current_node->is_inside_tree()) {
+		if (SceneTreeDock::get_singleton()->can_select_node(current_node)) {
+			InspectorDock::get_inspector_singleton()->edit(current_node);
+		}
+		if (current_node->is_inside_tree() && SceneTreeDock::get_singleton()->can_select_node(current_node)) {
 			//SignalsDock::get_singleton()->set_object(current_node);
 			//GroupsDock::get_singleton()->set_selection(Vector<Node *>{ current_node });
 			SceneTreeDock::get_singleton()->set_selected(current_node);
