@@ -223,7 +223,7 @@ private:
 	bool show_viewport = true;
 	bool show_helpers = false;
 	bool show_position_gizmos = true;
-	bool show_lock_gizmos = true;
+	bool show_lock_gizmos = false;
 	bool show_group_gizmos = true;
 	bool show_transformation_gizmos = true;
 
