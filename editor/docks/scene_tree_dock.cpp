@@ -5231,3 +5231,7 @@ SceneTreeDock::~SceneTreeDock() {
 		_clear_clipboard();
 	}
 }
+
+bool SceneTreeDock::can_select_node(const Node *p_node) const {
+	return scene_tree->can_select_node(p_node);
+}

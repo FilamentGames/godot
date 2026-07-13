@@ -361,6 +361,8 @@ public:
 	void paste_node_as_replacement();
 	List<Node *> get_node_clipboard() const;
 
+	bool can_select_node(const Node *p_node) const;
+
 	ScriptCreateDialog *get_script_create_dialog() {
 		return script_create_dialog;
 	}
