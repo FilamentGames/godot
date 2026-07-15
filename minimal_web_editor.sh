@@ -13,12 +13,12 @@ fi
 
 echo "Python: $($PYTHON --version)"
 
-if ! command -v scons >/dev/null 2>&1; then
+if ! "$PYTHON" -m SCons --version >/dev/null 2>&1; then
     echo "SCons not found. Installing via pip..."
     "$PYTHON" -m pip install scons
 fi
 
-echo "SCons: $(scons --version 2>&1 | head -n1)"
+echo "SCons: $("$PYTHON" -m SCons --version 2>&1 | head -n1)"
 echo
 
 # Requires a manually-set Env Var for the EMSDK Path
@@ -28,19 +28,14 @@ if [ -z "${EMSDK:-}" ]; then
     exit 1
 fi
 
-if [[ "${1:-}" == "-c" ]]; then
-    if [ -d "./bin" ]; then
-        echo "Removing existing bin directory..."
-        rm -rf ./bin
-    fi
-fi
-
 EMSDK="${EMSDK%/}"
+EMSCRIPTEN_VERSION="${EMSCRIPTEN_VERSION:-4.0.11}"
 
 echo "Activating Emscripten At Path: $EMSDK"
+echo "Emscripten Version: $EMSCRIPTEN_VERSION"
 
-"$EMSDK/emsdk" install latest
-"$EMSDK/emsdk" activate latest
+"$EMSDK/emsdk" install "$EMSCRIPTEN_VERSION"
+"$EMSDK/emsdk" activate "$EMSCRIPTEN_VERSION"
 # shellcheck source=/dev/null
 source "$EMSDK/emsdk_env.sh"
 
@@ -53,35 +48,56 @@ fi
 echo "Emscripten Activated ($(emcc -v 2>&1 | head -n1))"
 
 dev_build=false
+clean_build=false
 for arg in "$@"; do
-    if [[ "$arg" == "-dev" ]]; then
-        dev_build=true
-        break
-    fi
+    case "$arg" in
+        --dev) dev_build=true ;;
+        --clean) clean_build=true ;;
+    esac
 done
 
 if [[ "$dev_build" == true ]]; then
     production=no
     optimize=none
-    echo "Building Godot Editor (dev: production=no, optimize=none)..."
+    echo "Building Godot Editor (dev: debug_symbols=yes, use_assertions=yes, lto=none, optimize=speed_trace)..."
 else
     production=yes
     optimize=size_extra
     echo "Building Godot Editor..."
 fi
 
-scons \
-    platform=web \
-    target=editor \
-    production="$production" \
-    optimize="$optimize" \
-    deprecated=false \
-    disable_xr=true \
-    disable_overrides=true \
-    engine_update_check=false \
-    cache_path=".cache" \
-    cache_limit=10 \
-    modules_enabled_by_default=false \
+scons_args=(
+    platform=web
+    target=editor
+    production="$production"
+    optimize="$optimize"
+    deprecated=false
+    disable_xr=true
+    disable_overrides=true
+    engine_update_check=false
+    cache_path=.cache
+    cache_limit=10
+    modules_enabled_by_default=false
     build_profile=profile.gdbuild
+)
+
+if [[ "$dev_build" == true ]]; then
+    scons_args+=(
+        debug_symbols=yes
+        use_assertions=yes
+        lto=none
+    )
+else
+    scons_args+=(
+        use_closure_compiler=yes
+    )
+fi
+
+if [[ "$clean_build" == true ]]; then
+    echo "Cleaning previous build..."
+    "$PYTHON" -m SCons --clean "${scons_args[@]}"
+fi
+
+"$PYTHON" -m SCons "${scons_args[@]}"
 
 npx brotli-cli compress -q 5 --br=false bin/.web_zip/godot.editor.wasm

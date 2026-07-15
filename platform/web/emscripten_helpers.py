@@ -1,5 +1,7 @@
 import json
 import os
+import shlex
+import subprocess
 
 from SCons.Util import WhereIs
 
@@ -7,20 +9,23 @@ from platform_methods import get_build_version
 
 
 def run_closure_compiler(target, source, env, for_signature):
-    closure_bin = os.path.join(
-        os.path.dirname(WhereIs("emcc")),
+    emscripten_root = os.path.dirname(WhereIs("emcc"))
+    closure_cli = os.path.join(
+        emscripten_root,
         "node_modules",
-        ".bin",
         "google-closure-compiler",
+        "cli.js",
     )
-    cmd = [WhereIs("node"), closure_bin]
+    cmd = [WhereIs("node"), closure_cli]
     cmd.extend(["--compilation_level", "ADVANCED_OPTIMIZATIONS"])
     for f in env["JSEXTERNS"]:
         cmd.extend(["--externs", f.get_abspath()])
     for f in source:
         cmd.extend(["--js", f.get_abspath()])
     cmd.extend(["--js_output_file", target[0].get_abspath()])
-    return " ".join(cmd)
+    if os.name == "nt":
+        return subprocess.list2cmdline(cmd)
+    return " ".join(shlex.quote(str(c)) for c in cmd)
 
 
 def create_engine_file(env, target, source, externs, threads_enabled):

@@ -49,6 +49,9 @@
 #include "editor/settings/editor_feature_profile.h"
 #include "editor/settings/editor_settings.h"
 #include "editor/themes/editor_scale.h"
+#ifdef WEB_ENABLED
+#include "platform/web/editor/embedded_process_web.h"
+#endif
 #include "scene/gui/button.h"
 #include "scene/gui/label.h"
 #include "scene/gui/menu_button.h"
@@ -856,6 +859,12 @@ void GameView::_update_speed_state_size() {
 }
 
 GameView::EmbedAvailability GameView::_get_embed_available() {
+#ifdef WEB_ENABLED
+	// The web platform has no real window embedding, but `EmbeddedProcessWeb` pseudo-embeds
+	// the game as a positioned DOM overlay instead, so none of the checks below (which are
+	// about the behavior of a real OS window/process) apply.
+	return EMBED_AVAILABLE;
+#endif
 	if (!DisplayServer::get_singleton()->has_feature(DisplayServerEnums::FEATURE_WINDOW_EMBEDDING)) {
 		return EMBED_NOT_AVAILABLE_FEATURE_NOT_SUPPORTED;
 	}
@@ -1156,7 +1165,12 @@ void GameView::_notification(int p_what) {
 		} break;
 
 		case NOTIFICATION_READY: {
-			if (DisplayServer::get_singleton()->has_feature(DisplayServerEnums::FEATURE_WINDOW_EMBEDDING)) {
+			bool embedding_available = DisplayServer::get_singleton()->has_feature(DisplayServerEnums::FEATURE_WINDOW_EMBEDDING);
+#ifdef WEB_ENABLED
+			// `EmbeddedProcessWeb` pseudo-embeds via a DOM overlay instead of `DisplayServer::embed_process`.
+			embedding_available = true;
+#endif
+			if (embedding_available) {
 				// Embedding available.
 				int game_mode = EDITOR_GET("run/window_placement/game_embed_mode");
 				switch (game_mode) {
@@ -1177,7 +1191,13 @@ void GameView::_notification(int p_what) {
 						make_floating_on_play = EditorSettings::get_singleton()->get_project_metadata("game_view", "make_floating_on_play", true);
 					} break;
 				}
-				embed_size_mode = (EmbedSizeMode)(int)EditorSettings::get_singleton()->get_project_metadata("game_view", "embed_size_mode", SIZE_MODE_FIXED);
+
+#ifdef WEB_ENABLED
+				EmbedSizeMode default_size_mode = SIZE_MODE_KEEP_ASPECT;
+#else
+				EmbedSizeMode default_size_mode = SIZE_MODE_FIXED;
+#endif
+				embed_size_mode = (EmbedSizeMode)(int)EditorSettings::get_singleton()->get_project_metadata("game_view", "embed_size_mode", default_size_mode);
 				_update_embed_menu_options();
 
 				EditorRunBar::get_singleton()->connect("play_pressed", callable_mp(this, &GameView::_play_pressed));
@@ -1316,6 +1336,12 @@ void GameView::_update_arguments_for_instance(int p_idx, List<String> &r_argumen
 		E = N;
 	}
 
+#ifdef WEB_ENABLED
+	// Web pseudo-embedding uses a DOM overlay (`EmbeddedProcessWeb`); there is no native
+	// window handle to pass via `--wid`, and position/size are applied from the editor side.
+	return;
+#endif
+
 	// Add the editor window's native ID so the started game can directly set it as its parent.
 	List<String>::Element *N = r_arguments.insert_before(user_args_element, "--wid");
 	N = r_arguments.insert_after(N, itos(DisplayServer::get_singleton()->window_get_native_handle(DisplayServerEnums::WINDOW_HANDLE, get_window()->get_window_id())));
@@ -1440,7 +1466,7 @@ GameView::GameView(Ref<GameViewDebugger> p_debugger, EmbeddedProcessBase *p_embe
 
 	MarginContainer *toolbar_margin = memnew(MarginContainer);
 	toolbar_margin->set_theme_type_variation("MainToolBarMargin");
-	add_child(toolbar_margin);
+	//add_child(toolbar_margin);
 
 	// FIXME: Turn this back into a FlowContainer once GH-115523 is fixed.
 	HBoxContainer *main_menu_fc = memnew(HBoxContainer);
@@ -1795,7 +1821,11 @@ GameViewPlugin::GameViewPlugin() {
 #ifndef ANDROID_ENABLED
 	Ref<GameViewDebugger> game_view_debugger;
 	game_view_debugger.instantiate();
-	EmbeddedProcess *embedded_process = memnew(EmbeddedProcess);
+#ifdef WEB_ENABLED
+	EmbeddedProcessBase *embedded_process = memnew(EmbeddedProcessWeb);
+#else
+	EmbeddedProcessBase *embedded_process = memnew(EmbeddedProcess);
+#endif
 	setup(game_view_debugger, embedded_process);
 #endif
 }

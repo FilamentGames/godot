@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  web_tools_editor_plugin.cpp                                           */
+/*  library_godot_game_embed.js                                          */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,56 +28,36 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "web_tools_editor_plugin.h"
+// Web editor "embedding": the game runs as a second WASM instance in the same
+// page (see `editor.html`), so there's no real window to embed. Instead, the
+// editor tells the page to show/position/hide a DOM overlay above the Game
+// View panel via `globalThis.godotGameEmbed`, defined in `editor.html`.
+const GodotGameEmbed = {
+	godot_js_game_embed_show__proxy: 'sync',
+	godot_js_game_embed_show__sig: 'viiii',
+	godot_js_game_embed_show: function (p_x, p_y, p_w, p_h) {
+		const embed = globalThis['godotGameEmbed'];
+		if (embed) {
+			embed['show'](p_x, p_y, p_w, p_h);
+		}
+	},
 
-#include "editor_debugger_server_web.h"
+	godot_js_game_embed_update__proxy: 'sync',
+	godot_js_game_embed_update__sig: 'viiii',
+	godot_js_game_embed_update: function (p_x, p_y, p_w, p_h) {
+		const embed = globalThis['godotGameEmbed'];
+		if (embed) {
+			embed['update'](p_x, p_y, p_w, p_h);
+		}
+	},
 
-#include "core/config/engine.h"
-#include "core/io/dir_access.h"
-#include "core/io/file_access.h"
-#include "core/object/callable_mp.h"
-#include "editor/debugger/editor_debugger_server.h"
-#include "editor/editor_node.h"
-#include "editor/export/project_zip_packer.h"
-
-#include <emscripten/emscripten.h>
-
-// Web functions defined in library_godot_editor_tools.js
-extern "C" {
-extern void godot_js_os_download_buffer(const uint8_t *p_buf, int p_buf_size, const char *p_name, const char *p_mime);
-}
-
-static void _web_editor_init_callback() {
-	EditorDebuggerServer::register_protocol_handler("webipc://", EditorDebuggerServerWeb::create);
-	EditorNode::get_singleton()->add_editor_plugin(memnew(WebToolsEditorPlugin));
-}
-
-void WebToolsEditorPlugin::initialize() {
-	EditorNode::add_init_callback(_web_editor_init_callback);
-}
-
-WebToolsEditorPlugin::WebToolsEditorPlugin() {
-	add_tool_menu_item("Download Project Source", callable_mp(this, &WebToolsEditorPlugin::_download_zip));
-}
-
-void WebToolsEditorPlugin::_download_zip() {
-	if (!Engine::get_singleton() || !Engine::get_singleton()->is_editor_hint()) {
-		ERR_PRINT("Downloading the project as a ZIP archive is only available in Editor mode.");
-		return;
-	}
-	const String output_name = ProjectZIPPacker::get_project_zip_safe_name();
-	const String output_path = String("/tmp").path_join(output_name);
-	ProjectZIPPacker::pack_project_zip(output_path);
-
-	{
-		Ref<FileAccess> f = FileAccess::open(output_path, FileAccess::READ);
-		ERR_FAIL_COND_MSG(f.is_null(), "Unable to create ZIP file.");
-		Vector<uint8_t> buf;
-		buf.resize(f->get_length());
-		f->get_buffer(buf.ptrw(), buf.size());
-		godot_js_os_download_buffer(buf.ptr(), buf.size(), output_name.utf8().get_data(), "application/zip");
-	}
-
-	// Remove the temporary file since it was sent to the user's native filesystem as a download.
-	DirAccess::remove_file_or_error(output_path);
-}
+	godot_js_game_embed_hide__proxy: 'sync',
+	godot_js_game_embed_hide__sig: 'v',
+	godot_js_game_embed_hide: function () {
+		const embed = globalThis['godotGameEmbed'];
+		if (embed) {
+			embed['hide']();
+		}
+	},
+};
+mergeInto(LibraryManager.library, GodotGameEmbed);

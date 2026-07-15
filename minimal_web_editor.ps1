@@ -25,37 +25,64 @@ if (-not $env:EMSDK) {
     exit 1
 }
 
-Write-Host "Activating Emscripten At Path: $env:EMSDK`n"
+$emscriptenVersion = if ($env:EMSCRIPTEN_VERSION) { $env:EMSCRIPTEN_VERSION } else { "4.0.11" }
 
-. "$env:EMSDK\emsdk.ps1" install latest
-. "$env:EMSDK\emsdk.ps1" activate latest
+Write-Host "Activating Emscripten At Path: $env:EMSDK"
+Write-Host "Emscripten Version: $emscriptenVersion`n"
+
+. "$env:EMSDK\emsdk.ps1" install $emscriptenVersion
+. "$env:EMSDK\emsdk.ps1" activate $emscriptenVersion
 . "$env:EMSDK\emsdk_env.ps1"
 
-Write-Host "`nEmscripten Activated`n"
+if (-not (Get-Command emcc -ErrorAction SilentlyContinue)) {
+    Write-Error "Emscripten activation failed: emcc is not on PATH."
+    Write-Warning "Ensure EMSDK points to a valid Emscripten SDK root and that emsdk_env.ps1 ran successfully."
+    exit 1
+}
 
-$devBuild = $args -contains "-dev"
+Write-Host "Emscripten Activated $((emcc -v 2>&1 | Select-Object -First 1))`n"
+
+$devBuild = $args -contains "--dev"
+$cleanBuild = $args -contains "--clean"
 if ($devBuild) {
     $production = "no"
     $optimize = "none"
-    Write-Host "Building Godot Editor (dev: production=no, optimize=none)...`n"
+    Write-Host "Building Godot Editor (dev: debug_symbols=yes, use_assertions=yes, lto=none, optimize=speed_trace)...`n"
 } else {
     $production = "yes"
     $optimize = "size_extra"
     Write-Host "Building Godot Editor...`n"
 }
 
-scons `
-    platform=web `
-    target=editor `
-    production=$production `
-    optimize=$optimize `
-    deprecated=false `
-    disable_xr=true `
-    disable_overrides=true `
-    engine_update_check=false `
-    cache_path=".cache" `
-    cache_limit=10 `
-    modules_enabled_by_default=false `
-    build_profile=profile.gdbuild
+$sconsArgs = @(
+    "platform=web",
+    "target=editor",
+    "production=$production",
+    "optimize=$optimize",
+    "deprecated=false",
+    "disable_xr=true",
+    "disable_overrides=true",
+    "engine_update_check=false",
+    "cache_path=.cache",
+    "cache_limit=10",
+    "modules_enabled_by_default=false",
+    "build_profile=profile.gdbuild"
+)
+
+if ($devBuild) {
+    $sconsArgs += @("debug_symbols=yes", "use_assertions=yes", "lto=none")
+} else {
+    $sconsArgs += @("use_closure_compiler=yes")
+}
+
+if ($cleanBuild) {
+    Write-Host "Cleaning previous build...`n"
+    scons --clean @sconsArgs
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+}
+
+scons @sconsArgs
 
 npx brotli-cli compress -q 5 --br=false bin\.web_zip\godot.editor.wasm

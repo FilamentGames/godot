@@ -210,7 +210,7 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_i
 
 		set_selected(n);
 
-		EditorDockManager::get_singleton()->focus_dock(GroupsDock::get_singleton());
+		//EditorDockManager::get_singleton()->focus_dock(GroupsDock::get_singleton());
 	} else if (p_id == BUTTON_UNIQUE) {
 		bool ask_before_revoking_unique_name = EDITOR_GET("docks/scene_tree/ask_before_revoking_unique_name");
 		revoke_node = n;
@@ -766,6 +766,9 @@ void SceneTreeEditor::_update_visibility_color(Node *p_node, TreeItem *p_item) {
 			color.a = 0.6;
 		}
 		int idx = p_item->get_button_by_id(0, BUTTON_VISIBILITY);
+		if (idx == -1) {
+			return;
+		}
 		p_item->set_button_color(0, idx, color);
 	}
 }

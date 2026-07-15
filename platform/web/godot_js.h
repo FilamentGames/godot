@@ -135,6 +135,26 @@ extern void godot_js_display_vk_cb(void (*p_input)(const char *p_text, int p_cur
 extern void godot_js_display_vk_show(const char *p_text, int p_type, int p_start, int p_end);
 extern void godot_js_display_vk_hide();
 
+// Debug IPC (same-page editor<->game debugger transport, see the `webipc://` scheme).
+extern void godot_js_debug_ipc_open(const char *p_role);
+extern void godot_js_debug_ipc_close();
+extern int godot_js_debug_ipc_is_open();
+extern int godot_js_debug_ipc_is_connection_available();
+extern void godot_js_debug_ipc_accept();
+extern void godot_js_debug_ipc_send(const char *p_role, const uint8_t *p_ptr, int p_len);
+extern int godot_js_debug_ipc_avail(const char *p_role);
+extern int godot_js_debug_ipc_recv(const char *p_role, uint8_t *p_ptr, int p_len);
+
+// Web editor: stop the separately loaded game WASM instance (see editor.html).
+extern int godot_js_os_request_game_quit();
+
+// Web editor: position the game overlay over the Game View panel (see editor.html).
+// Rects are given in the editor canvas's coordinate space (device pixels); the JS side
+// maps them to CSS pixels using the canvas's bounding rect and scale.
+extern void godot_js_game_embed_show(int p_x, int p_y, int p_w, int p_h);
+extern void godot_js_game_embed_update(int p_x, int p_y, int p_w, int p_h);
+extern void godot_js_game_embed_hide();
+
 #ifdef __cplusplus
 }
 #endif

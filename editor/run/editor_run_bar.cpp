@@ -358,7 +358,14 @@ void EditorRunBar::_run_scene(const String &p_scene_path, const Vector<String> &
 	// Use the existing URI, in case it is overridden by the CLI.
 	String uri = EditorDebuggerNode::get_singleton()->get_server_uri();
 	if (uri.is_empty()) {
+#ifdef WEB_ENABLED
+		// The game runs in a second canvas of the same page; a real socket
+		// server can't be opened from the browser, so use the same-page
+		// debugger transport instead.
+		uri = "webipc://";
+#else
 		uri = "tcp://";
+#endif
 	}
 	EditorDebuggerNode::get_singleton()->start(uri);
 	Error error = editor_run.run(run_filename, write_movie_file, args);
