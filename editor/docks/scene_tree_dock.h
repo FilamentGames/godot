@@ -190,7 +190,8 @@ class SceneTreeDock : public EditorDock {
 
 	Ref<ShaderMaterial> selected_shader_material;
 
-	void _add_children_to_popup(Object *p_obj, int p_depth);
+	// Disabled to remove the 'Sub-Resources' menu item.
+	//void _add_children_to_popup(Object *p_obj, int p_depth);
 
 	void _node_reparent(NodePath p_path, bool p_keep_global_xform);
 	void _do_reparent(Node *p_new_parent, int p_position_in_parent, Vector<Node *> p_nodes, bool p_keep_global_xform);
