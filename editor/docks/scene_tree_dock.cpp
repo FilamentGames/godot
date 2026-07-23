@@ -3864,17 +3864,19 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 	scene_tree->get_scene_tree()->grab_focus(true);
 
 	if (selection.is_empty()) {
-		if (!profile_allow_editing) {
-			return;
-		}
+		//	If Nothing is selected, don't show the empty context menu.
 
-		menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Add")), ED_GET_SHORTCUT("scene_tree/add_child_node"), TOOL_NEW);
-		menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Instance")), ED_GET_SHORTCUT("scene_tree/instantiate_scene"), TOOL_INSTANTIATE);
-		EditorContextMenuPluginManager::get_singleton()->add_options_from_plugins(menu, EditorContextMenuPlugin::CONTEXT_SLOT_SCENE_TREE, PackedStringArray());
+		// if (!profile_allow_editing) {
+		// 	return;
+		// }
 
-		menu->reset_size();
-		menu->set_position(p_menu_pos);
-		menu->popup();
+		// menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Add")), ED_GET_SHORTCUT("scene_tree/add_child_node"), TOOL_NEW);
+		// menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Instance")), ED_GET_SHORTCUT("scene_tree/instantiate_scene"), TOOL_INSTANTIATE);
+		// EditorContextMenuPluginManager::get_singleton()->add_options_from_plugins(menu, EditorContextMenuPlugin::CONTEXT_SLOT_SCENE_TREE, PackedStringArray());
+
+		// menu->reset_size();
+		// menu->set_position(p_menu_pos);
+		// menu->popup();
 		return;
 	}
 
@@ -4160,6 +4162,13 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 	}
 	EditorContextMenuPluginManager::get_singleton()->add_options_from_plugins(menu, EditorContextMenuPlugin::CONTEXT_SLOT_SCENE_TREE, p_paths);
 
+	//	If the menu is empty, hide it and return.
+	if (menu->get_item_count() == 0) {
+		menu->hide();
+		return;
+	}
+
+	//	Note: size here means the X/Y size of the menu.
 	menu->reset_size();
 	menu->set_position(p_menu_pos);
 	menu->popup();
