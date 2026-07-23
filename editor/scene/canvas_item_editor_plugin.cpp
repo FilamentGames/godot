@@ -2522,6 +2522,13 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 				EditorContextMenuPluginManager::get_singleton()->add_options_from_plugins(add_node_menu, EditorContextMenuPlugin::CONTEXT_SLOT_2D_EDITOR, paths);
 			}
 
+			//	If the menu is empty, hide it and return false.
+			if (add_node_menu->get_item_count() == 0) {
+				add_node_menu->hide();
+				return false;
+			}
+
+			//	Note: size here means the X/Y size of the menu.
 			add_node_menu->reset_size();
 			add_node_menu->set_position(viewport->get_screen_transform().xform(b->get_position()));
 			add_node_menu->popup();
