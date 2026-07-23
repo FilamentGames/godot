@@ -33,10 +33,7 @@
 #include "core/io/resource.h"
 #include "core/object/object.h"
 #include "core/object/script_language.h"
-#include "editor/docks/scene_tree_dock.h"
-#include "editor/scene/canvas_item_editor_plugin.h"
 
-class CanvasItemEditor;
 class Control;
 class CreateDialog;
 class EditorCommandPalette;
@@ -51,6 +48,7 @@ class EditorToaster;
 class EditorUndoRedoManager;
 class FileSystemDock;
 class InspectorDock;
+class SceneTreeDock;
 class Mesh;
 class Node;
 class PropertySelector;
@@ -170,7 +168,7 @@ public:
 	InspectorDock *get_inspector_dock() const;
 	SceneTreeDock *get_scene_tree_dock() const;
 
-	CanvasItemEditor *get_canvas_item_editor() const;
+	void set_editor_viewport_2d_focus(const Vector2 &p_position, real_t p_zoom);
 
 	// Object/Resource/Node editing.
 

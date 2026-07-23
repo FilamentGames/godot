@@ -38,6 +38,8 @@
 #include "core/object/class_db.h"
 #include "editor/docks/filesystem_dock.h"
 #include "editor/docks/inspector_dock.h"
+#include "editor/docks/scene_tree_dock.h"
+#include "editor/scene/canvas_item_editor_plugin.h"
 #include "editor/editor_main_screen.h"
 #include "editor/editor_node.h"
 #include "editor/editor_undo_redo_manager.h"
@@ -686,8 +688,10 @@ SceneTreeDock *EditorInterface::get_scene_tree_dock() const {
 	return SceneTreeDock::get_singleton();
 }
 
-CanvasItemEditor *EditorInterface::get_canvas_item_editor() const {
-	return CanvasItemEditor::get_singleton();
+void EditorInterface::set_editor_viewport_2d_focus(const Vector2 &p_position, real_t p_zoom) {
+	if (CanvasItemEditor *editor = CanvasItemEditor::get_singleton()) {
+		editor->set_viewport_focus(p_position, p_zoom);
+	}
 }
 
 // Object/Resource/Node editing.
@@ -923,7 +927,7 @@ void EditorInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_inspector_dock"), &EditorInterface::get_inspector_dock); // added for Baby Godot
 	ClassDB::bind_method(D_METHOD("get_scene_tree_dock"), &EditorInterface::get_scene_tree_dock); // added for Baby Godot
 	ClassDB::bind_method(D_METHOD("get_inspector"), &EditorInterface::get_inspector);
-	ClassDB::bind_method(D_METHOD("get_canvas_item_editor"), &EditorInterface::get_canvas_item_editor); // added for Baby Godot
+	ClassDB::bind_method(D_METHOD("set_editor_viewport_2d_focus", "position", "zoom"), &EditorInterface::set_editor_viewport_2d_focus); // added for Baby Godot
 
 	// Object/Resource/Node editing.
 

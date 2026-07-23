@@ -9217,9 +9217,21 @@ EditorNode::EditorNode() {
 	const String docks_section = "docks";
 	default_layout.instantiate();
 	// Dock numbers are based on DockSlot enum value + 1.
-	default_layout->set_value(docks_section, "dock_3", "Scene,Import");
-	default_layout->set_value(docks_section, "dock_4", "History");
-	default_layout->set_value(docks_section, "dock_5", "Inspector,Signals,Groups");
+	{
+		const String scene_key = SceneTreeDock::get_singleton()->get_effective_layout_key();
+		default_layout->set_value(docks_section, "dock_3", scene_key);
+		default_layout->set_value(docks_section, "dock_3_selected_tab_idx", 0);
+	}
+	{
+		const String filesystem_key = filesystem_dock->get_effective_layout_key();
+		default_layout->set_value(docks_section, "dock_4", filesystem_key);
+		default_layout->set_value(docks_section, "dock_4_selected_tab_idx", 0);
+	}
+	{
+		const String inspector_key = InspectorDock::get_singleton()->get_effective_layout_key();
+		default_layout->set_value(docks_section, "dock_5", inspector_key);
+		default_layout->set_value(docks_section, "dock_5_selected_tab_idx", 0);
+	}
 
 	int hsplits[] = { 0, dock_hsize, -dock_hsize, 0 };
 	for (int i = 0; i < (int)std_size(hsplits); i++) {
