@@ -2492,8 +2492,8 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 
 		if (b.is_valid() && b->is_pressed() && b->get_button_index() == MouseButton::RIGHT && tool != TOOL_SCENE_PAINT) {
 			add_node_menu->clear();
-			add_node_menu->add_icon_item(get_editor_theme_icon(SNAME("Add")), TTRC("Add 2D Node Here..."), ADD_NODE);
-			add_node_menu->add_icon_item(get_editor_theme_icon(SNAME("Instance")), TTRC("Instantiate Scene Here..."), ADD_INSTANCE);
+			//add_node_menu->add_icon_item(get_editor_theme_icon(SNAME("Add")), TTRC("Add 2D Node Here..."), ADD_NODE);
+			//add_node_menu->add_icon_item(get_editor_theme_icon(SNAME("Instance")), TTRC("Instantiate Scene Here..."), ADD_INSTANCE);
 			for (Node *node : SceneTreeDock::get_singleton()->get_node_clipboard()) {
 				if (Object::cast_to<CanvasItem>(node)) {
 					add_node_menu->add_icon_item(get_editor_theme_icon(SNAME("ActionPaste")), TTRC("Paste Node(s) Here"), ADD_PASTE);
@@ -2522,6 +2522,13 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 				EditorContextMenuPluginManager::get_singleton()->add_options_from_plugins(add_node_menu, EditorContextMenuPlugin::CONTEXT_SLOT_2D_EDITOR, paths);
 			}
 
+			//	If the menu is empty, hide it and return false.
+			if (add_node_menu->get_item_count() == 0) {
+				add_node_menu->hide();
+				return false;
+			}
+
+			//	Note: size here means the X/Y size of the menu.
 			add_node_menu->reset_size();
 			add_node_menu->set_position(viewport->get_screen_transform().xform(b->get_position()));
 			add_node_menu->popup();

@@ -271,59 +271,6 @@
 		</style>
 	</head>
 	<body>
-		<dialog
-			id="welcome-modal"
-			class="welcome-modal"
-			aria-labelledby="welcome-modal-title"
-			aria-describedby="welcome-modal-description"
-		>
-			<div class="welcome-modal-content">
-				<h2 id="welcome-modal-title" class="welcome-modal-title">Important - Please read before continuing</h2>
-				<div id="welcome-modal-description">
-					<p>
-						The Godot Web Editor has some limitations compared to the native version.<br>
-						Its main focus is education and experimentation;
-						<strong>it is not recommended for production</strong>.
-					</p>
-					<p>
-						For a more optimal experience, <a
-							href="https://godotengine.org/download/"
-							target="_blank"
-							rel="noopener"
-						>download</a> the native Godot Editor.
-					</p>
-					<p>
-						Refer to the
-						<a
-							href="https://docs.godotengine.org/en/stable/tutorials/editor/using_the_web_editor.html"
-							target="_blank"
-							rel="noopener"
-						>Web editor documentation</a> for usage instructions and limitations.
-					</p>
-				</div>
-				<div id="welcome-modal-missing-description" style="display: none">
-					<p>
-						<strong>The following features required by the Godot Web Editor are missing:</strong>
-					</p>
-					<ul id="welcome-modal-missing-list">
-					</ul>
-					<p>
-						If you are self-hosting the web editor,
-						refer to
-						<a
-							href="https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_web.html"
-							target="_blank"
-							rel="noopener"
-						>Exporting for the Web</a> for more information.
-					</p>
-				</div>
-				<div style="text-align: center">
-					<button id="welcome-modal-dismiss" class="btn" type="button" onclick="closeWelcomeModal(true)" style="margin-top: 1rem">
-						OK - Don't Show Again
-					</button>
-				</div>
-			</div>
-		</dialog>
 		<div id="dialogs">
 			<dialog id="dialog-editor">
 				<canvas id="editor-canvas">
@@ -390,29 +337,7 @@
 						console.error('Error while registering service worker:', e);
 					}
 				}
-
-				const missing = Engine.getMissingFeatures({
-					threads: ___GODOT_THREADS_ENABLED___,
-				});
-				const modal = document.getElementById('welcome-modal');
-				if (missing.length) {
-					// Display error dialog as threading support is required for the editor.
-					document.getElementById('welcome-modal-description').style.display = 'none';
-					document.getElementById('welcome-modal-missing-description').style.display = 'block';
-					document.getElementById('welcome-modal-dismiss').style.display = 'none';
-					const list = document.getElementById('welcome-modal-missing-list');
-					for (let i = 0; i < missing.length; i++) {
-						const node = document.createElement('li');
-						node.innerText = missing[i];
-						list.appendChild(node);
-					}
-
-					modal.showModal();
-				} else if (localStorage.getItem('welcomeModalDismissed') !== 'true') {
-					modal.showModal();
-				} else {
-					startEditorFromProjectZip();
-				}
+				startEditorFromProjectZip();
 			});
 
 			function closeWelcomeModal(dontShowAgain) { // eslint-disable-line no-unused-vars
