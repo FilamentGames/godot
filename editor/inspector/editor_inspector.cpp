@@ -3979,8 +3979,11 @@ EditorInspector *EditorInspector::create_default_inspector(LineEdit *p_filter_li
 	inspector->set_autoclear(true);
 	inspector->set_show_categories(true, true);
 	inspector->set_use_doc_hints(true);
-	inspector->set_hide_script(false);
-	inspector->set_hide_metadata(false);
+
+	//	Min Web Editor: Hide script and the metadata button to avoid confusion.
+	inspector->set_hide_script(true);
+	inspector->set_hide_metadata(true);
+
 	inspector->set_use_settings_name_style(false);
 	inspector->set_property_name_style(EditorPropertyNameProcessor::get_default_inspector_style());
 	inspector->set_use_folding(!bool(EDITOR_GET("interface/inspector/disable_folding")));
