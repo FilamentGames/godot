@@ -3605,6 +3605,30 @@ void Node::_validate_property(PropertyInfo &p_property) const {
 	if ((p_property.name == "process_thread_group_order" || p_property.name == "process_thread_messages") && data.process_thread_group == PROCESS_THREAD_GROUP_INHERIT) {
 		p_property.usage = PROPERTY_USAGE_NONE;
 	}
+
+	static const char *read_only_properties[] = {
+		// Process
+		"process_mode",
+		"process_priority",
+		"process_physics_priority",
+		"process_thread_group",
+		"process_thread_group_order",
+		"process_thread_messages",
+		// Physics Interpolation
+		"physics_interpolation_mode",
+		// Auto Translate
+		"auto_translate_mode",
+		// Editor Description
+		"editor_description",
+		// Script is handled by editor_inspector.cpp via its set_hide_script() method.
+	};
+
+	for (const char *property : read_only_properties) {
+		if (p_property.name == property) {
+			p_property.usage |= PROPERTY_USAGE_READ_ONLY;
+			break;
+		}
+	}
 }
 
 String Node::_to_string() {
