@@ -54,6 +54,10 @@ protected:
 	void _notification(int p_notification);
 	static void _bind_methods();
 
+	// Min Web Editor: Hide certain properties to avoid confusion.
+	// This is called automatically by a GDCLASS Macro.
+	void _validate_property(PropertyInfo &p_property) const;
+
 public:
 	static constexpr AncestralClass static_ancestral_class = AncestralClass::NODE_2D;
 
