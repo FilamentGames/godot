@@ -516,6 +516,44 @@ void Node2D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::TRANSFORM2D, "global_transform", PROPERTY_HINT_NONE, "suffix:px", PROPERTY_USAGE_NONE), "set_global_transform", "get_global_transform");
 }
 
+void Node2D::_validate_property(PropertyInfo &p_property) const {
+
+	static const char *read_only_properties[] = {
+		// Node-level items are disabled in Node.cpp
+		
+		// - Inherited CanvasItem Properties
+		// 	 This only affects Node2D items. If needed globally, move to the CanvasItem class.
+		// Visibility
+		"visible",
+		"modulate",
+		"self_modulate",
+		"show_behind_parent",
+		"top_level",
+		"clip_children",
+		"oversampling_with_scale",
+		"light_mask",
+		"visibility_layer",
+		// Ordering
+		//"z_index", // enabled for the user to mess with
+		"z_as_relative",
+		"y_sort_enabled",
+		// Texture
+		"texture_filter",
+		"texture_repeat",
+		// Material
+		"material",
+		"use_parent_material",
+	};
+
+	for (const char *property : read_only_properties) {
+		if (p_property.name == property) {
+			// To hde completely, set to PROPERTY_USAGE_NONE.
+			p_property.usage |= PROPERTY_USAGE_READ_ONLY;
+			break;
+		}
+	}
+}
+
 Node2D::Node2D() {
 	_define_ancestry(AncestralClass::NODE_2D);
 }
