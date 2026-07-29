@@ -88,5 +88,7 @@ public:
 	void add_main_plugin(EditorPlugin *p_editor);
 	void remove_main_plugin(EditorPlugin *p_editor);
 
+	void set_all_buttons_disabled(bool p_disabled);
+
 	EditorMainScreen();
 };

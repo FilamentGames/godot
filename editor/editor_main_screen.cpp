@@ -316,6 +316,12 @@ void EditorMainScreen::remove_main_plugin(EditorPlugin *p_editor) {
 	main_editor_plugins.erase(p_editor->get_plugin_name());
 }
 
+void EditorMainScreen::set_all_buttons_disabled(bool p_disabled) {
+	for (Button *button : buttons) {
+		button->set_disabled(p_disabled);
+	}
+}
+
 EditorMainScreen::EditorMainScreen() {
 	main_screen_vbox = memnew(VBoxContainer);
 	main_screen_vbox->set_name("MainScreen");

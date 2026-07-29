@@ -31,6 +31,7 @@
 #pragma once
 
 #include "core/os/process_id.h"
+#include "editor/editor_main_screen.h"
 #include "editor/run/editor_run.h"
 #include "scene/gui/margin_container.h"
 
@@ -94,6 +95,7 @@ class EditorRunBar : public MarginContainer {
 
 	void _reset_play_buttons();
 	void _update_play_buttons();
+	void _update_main_panel_tabs();
 
 	void _movie_maker_item_pressed(int p_id);
 	void _write_movie_toggled(bool p_enabled);
