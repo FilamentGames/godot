@@ -118,6 +118,8 @@ void EditorRunBar::_notification(int p_what) {
 }
 
 void EditorRunBar::_reset_play_buttons() {
+	_update_main_panel_tabs();
+
 	if (Engine::get_singleton()->is_recovery_mode_hint()) {
 		return;
 	}
@@ -161,6 +163,10 @@ void EditorRunBar::_update_play_buttons() {
 		active_button->set_pressed(true);
 		active_button->set_button_icon(get_editor_theme_icon(SNAME("Reload")));
 	}
+}
+
+void EditorRunBar::_update_main_panel_tabs() {
+	EditorNode::get_editor_main_screen()->set_all_buttons_disabled(is_playing());
 }
 
 void EditorRunBar::_movie_maker_item_pressed(int p_id) {
