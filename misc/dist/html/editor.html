@@ -437,13 +437,6 @@
 
 			globalThis.godotRequestGameQuit = stopGame;
 
-			function closeEditor() { // eslint-disable-line no-unused-vars
-				closeGame();
-				if (editor) {
-					editor.requestQuit();
-				}
-			}
-
 			function startEditor(zip) {
 				const INDETERMINATE_STATUS_STEP_MS = 100;
 				const persistentPaths = ['/home/web_user'];
