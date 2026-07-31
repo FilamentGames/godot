@@ -140,6 +140,9 @@ protected:
 
 	virtual void set_cmdline(const char *p_execpath, const List<String> &p_args, const List<String> &p_user_args);
 
+	// Called after OS::initialize() and command-line parsing, before ProjectSettings::setup().
+	virtual void prepare_project_path(const String &p_project_path) {}
+
 	virtual bool _check_internal_feature_support(const String &p_feature) = 0;
 
 public:

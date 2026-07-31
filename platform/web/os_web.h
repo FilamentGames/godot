@@ -65,6 +65,8 @@ protected:
 
 	void finalize() override;
 
+	void prepare_project_path(const String &p_project_path) override;
+
 	bool _check_internal_feature_support(const String &p_feature) override;
 
 public:

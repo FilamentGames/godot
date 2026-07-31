@@ -44,6 +44,11 @@
 #include "drivers/unix/file_access_unix.h"
 #include "main/main.h"
 
+#ifdef TOOLS_ENABLED
+#include "core/io/dir_access.h"
+#include "editor/project_manager/project_zip_installer.h"
+#endif
+
 #include <dlfcn.h>
 #include <emscripten.h>
 
@@ -57,6 +62,26 @@ void OS_Web::initialize() {
 	IPWeb::make_default();
 	NetSocketWeb::make_default();
 	DisplayServerWeb::register_web_driver();
+}
+
+void OS_Web::prepare_project_path(const String &p_project_path) {
+#ifdef TOOLS_ENABLED
+	// editor.html copies project.zip to this path before launching with `--path`.
+	static const char *WEB_PRELOAD_ZIP = "/tmp/preload.zip";
+
+	if (!FileAccess::exists(WEB_PRELOAD_ZIP)) {
+		return;
+	}
+	if (FileAccess::exists(p_project_path.path_join("project.godot"))) {
+		DirAccess::remove_absolute(WEB_PRELOAD_ZIP);
+		return;
+	}
+	Error err = install_project_from_zip(WEB_PRELOAD_ZIP, p_project_path, true);
+	DirAccess::remove_absolute(WEB_PRELOAD_ZIP);
+	if (err != OK) {
+		ERR_PRINT("Failed to install preload project zip.");
+	}
+#endif
 }
 
 void OS_Web::resume_audio() {
