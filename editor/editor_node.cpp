@@ -1078,7 +1078,9 @@ void EditorNode::_notification(int p_what) {
 		} break;
 
 		case NOTIFICATION_WM_CLOSE_REQUEST: {
+#if !defined(WEB_ENABLED)
 			_menu_option_confirm(SCENE_QUIT, false);
+#endif
 		} break;
 
 		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
@@ -4248,12 +4250,19 @@ void EditorNode::_discard_changes(const String &p_str) {
 			confirmation->hide();
 		} break;
 		case SCENE_QUIT: {
+#if defined(WEB_ENABLED)
+			break;
+#else
 			project_run_bar->stop_playing();
 			_exit_editor(EXIT_SUCCESS);
-
+#endif
 		} break;
 		case PROJECT_QUIT_TO_PROJECT_MANAGER: {
+#if defined(WEB_ENABLED)
+			break;
+#else
 			_restart_editor(true);
+#endif
 		} break;
 		case PROJECT_RELOAD_CURRENT_PROJECT: {
 			_restart_editor();
@@ -6751,6 +6760,12 @@ bool EditorNode::_is_closing_editor() const {
 }
 
 void EditorNode::_restart_editor(bool p_goto_project_manager) {
+#if defined(WEB_ENABLED)
+	if (p_goto_project_manager) {
+		return;
+	}
+#endif
+
 	exiting = true;
 
 	if (project_run_bar->is_playing()) {
@@ -8059,7 +8074,9 @@ void EditorNode::_build_file_menu() {
 	if (menu_type != MENU_TYPE_GLOBAL) {
 		// On macOS "Quit" option is in the "app" menu.
 		file_menu->add_separator();
+#if !defined(WEB_ENABLED)
 		file_menu->add_shortcut(ED_GET_SHORTCUT("editor/file_quit"), SCENE_QUIT, true);
+#endif
 	}
 #else
 	//file_menu->add_separator();
@@ -8106,7 +8123,9 @@ void EditorNode::_build_project_menu() {
 
 	project_menu->add_separator();
 	project_menu->add_shortcut(ED_GET_SHORTCUT("editor/reload_current_project"), PROJECT_RELOAD_CURRENT_PROJECT);
+#if !defined(WEB_ENABLED)
 	project_menu->add_shortcut(ED_GET_SHORTCUT("editor/quit_to_project_list"), PROJECT_QUIT_TO_PROJECT_MANAGER, true);
+#endif
 }
 
 void EditorNode::_build_settings_menu() {
