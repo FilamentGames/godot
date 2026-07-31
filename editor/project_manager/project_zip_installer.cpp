@@ -76,7 +76,7 @@ Error install_project_from_zip(const String &p_zip_path, const String &p_target_
 
 	if (ret == UNZ_END_OF_LIST_OF_FILE) {
 		unzClose(pkg);
-		return ERR_FILE_MISSING;
+		return ERR_FILE_NOT_FOUND;
 	}
 
 	if (p_create_dir) {
