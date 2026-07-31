@@ -214,44 +214,48 @@ void SceneTreeDock::shortcut_input(const Ref<InputEvent> &p_event) {
 			return;
 		}
 		_tool_selected(TOOL_RENAME);
-	} else if (ED_IS_SHORTCUT("scene_tree/batch_rename", p_event)) {
-		_tool_selected(TOOL_BATCH_RENAME);
-	} else if (ED_IS_SHORTCUT("scene_tree/add_child_node", p_event)) {
-		_tool_selected(TOOL_NEW);
-	} else if (ED_IS_SHORTCUT("scene_tree/instantiate_scene", p_event)) {
-		_tool_selected(TOOL_INSTANTIATE);
-	} else if (ED_IS_SHORTCUT("scene_tree/expand_collapse_all", p_event)) {
-		_tool_selected(TOOL_EXPAND_COLLAPSE);
+	// Disabled for Baby Godot: shortcuts below are not registered.
+	//} else if (ED_IS_SHORTCUT("scene_tree/batch_rename", p_event)) {
+	//	_tool_selected(TOOL_BATCH_RENAME);
+	//} else if (ED_IS_SHORTCUT("scene_tree/add_child_node", p_event)) {
+	//	_tool_selected(TOOL_NEW);
+	//} else if (ED_IS_SHORTCUT("scene_tree/instantiate_scene", p_event)) {
+	//	_tool_selected(TOOL_INSTANTIATE);
+	//} else if (ED_IS_SHORTCUT("scene_tree/expand_collapse_all", p_event)) {
+	//	_tool_selected(TOOL_EXPAND_COLLAPSE);
 	} else if (ED_IS_SHORTCUT("scene_tree/cut_node", p_event)) {
 		_tool_selected(TOOL_CUT);
 	} else if (ED_IS_SHORTCUT("scene_tree/copy_node", p_event)) {
 		_tool_selected(TOOL_COPY);
 	} else if (ED_IS_SHORTCUT("scene_tree/paste_node_as_replacement", p_event)) {
 		_tool_selected(TOOL_PASTE_AS_REPLACEMENT);
-	} else if (ED_IS_SHORTCUT("scene_tree/change_node_type", p_event)) {
-		_tool_selected(TOOL_CHANGE_TYPE);
-	} else if (ED_IS_SHORTCUT("scene_tree/attach_script", p_event)) {
-		_tool_selected(TOOL_ATTACH_SCRIPT);
-	} else if (ED_IS_SHORTCUT("scene_tree/detach_script", p_event)) {
-		_tool_selected(TOOL_DETACH_SCRIPT);
+	// Disabled for Baby Godot: shortcuts below are not registered.
+	//} else if (ED_IS_SHORTCUT("scene_tree/change_node_type", p_event)) {
+	//	_tool_selected(TOOL_CHANGE_TYPE);
+	//} else if (ED_IS_SHORTCUT("scene_tree/attach_script", p_event)) {
+	//	_tool_selected(TOOL_ATTACH_SCRIPT);
+	//} else if (ED_IS_SHORTCUT("scene_tree/detach_script", p_event)) {
+	//	_tool_selected(TOOL_DETACH_SCRIPT);
 	} else if (ED_IS_SHORTCUT("scene_tree/reparent", p_event)) {
 		_tool_selected(TOOL_REPARENT);
-	} else if (ED_IS_SHORTCUT("scene_tree/reparent_to_new_node", p_event)) {
-		_tool_selected(TOOL_REPARENT_TO_NEW_NODE);
-	} else if (ED_IS_SHORTCUT("scene_tree/save_branch_as_scene", p_event)) {
-		_tool_selected(TOOL_NEW_SCENE_FROM);
-	} else if (ED_IS_SHORTCUT("scene_tree/delete_no_confirm", p_event)) {
-		_tool_selected(TOOL_ERASE, true);
+	// Disabled for Baby Godot: shortcuts below are not registered.
+	//} else if (ED_IS_SHORTCUT("scene_tree/reparent_to_new_node", p_event)) {
+	//	_tool_selected(TOOL_REPARENT_TO_NEW_NODE);
+	//} else if (ED_IS_SHORTCUT("scene_tree/save_branch_as_scene", p_event)) {
+	//	_tool_selected(TOOL_NEW_SCENE_FROM);
+	//} else if (ED_IS_SHORTCUT("scene_tree/delete_no_confirm", p_event)) {
+	//	_tool_selected(TOOL_ERASE, true);
 	} else if (ED_IS_SHORTCUT("scene_tree/copy_node_path", p_event)) {
 		_tool_selected(TOOL_COPY_NODE_PATH);
-	} else if (ED_IS_SHORTCUT("scene_tree/show_in_file_system", p_event)) {
-		_tool_selected(TOOL_SHOW_IN_FILE_SYSTEM);
-	} else if (ED_IS_SHORTCUT("scene_tree/toggle_unique_name", p_event)) {
-		_tool_selected(TOOL_TOGGLE_SCENE_UNIQUE_NAME);
-	} else if (ED_IS_SHORTCUT("scene_tree/toggle_editable_children", p_event)) {
-		_tool_selected(TOOL_SCENE_EDITABLE_CHILDREN);
-	} else if (ED_IS_SHORTCUT("scene_tree/open_scene_in_editor", p_event)) {
-		_tool_selected(TOOL_SCENE_OPEN);
+	// Disabled for Baby Godot: shortcuts below are not registered.
+	//} else if (ED_IS_SHORTCUT("scene_tree/show_in_file_system", p_event)) {
+	//	_tool_selected(TOOL_SHOW_IN_FILE_SYSTEM);
+	//} else if (ED_IS_SHORTCUT("scene_tree/toggle_unique_name", p_event)) {
+	//	_tool_selected(TOOL_TOGGLE_SCENE_UNIQUE_NAME);
+	//} else if (ED_IS_SHORTCUT("scene_tree/toggle_editable_children", p_event)) {
+	//	_tool_selected(TOOL_SCENE_EDITABLE_CHILDREN);
+	//} else if (ED_IS_SHORTCUT("scene_tree/open_scene_in_editor", p_event)) {
+	//	_tool_selected(TOOL_SCENE_OPEN);
 	} else if (ED_IS_SHORTCUT("scene_tree/delete", p_event)) {
 		_tool_selected(TOOL_ERASE);
 	} else {
@@ -278,9 +282,10 @@ void SceneTreeDock::_scene_tree_gui_input(Ref<InputEvent> p_event) {
 		filter->grab_focus();
 		filter->select_all();
 		accept_event();
-	} else if (ED_IS_SHORTCUT("scene_tree/open_scene_in_editor", p_event)) {
-		_tool_selected(TOOL_SCENE_OPEN);
-		accept_event();
+	// Disabled for Baby Godot: shortcut is not registered.
+	//} else if (ED_IS_SHORTCUT("scene_tree/open_scene_in_editor", p_event)) {
+	//	_tool_selected(TOOL_SCENE_OPEN);
+	//	accept_event();
 	}
 }
 
@@ -4033,7 +4038,9 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 				menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Rename")), ED_GET_SHORTCUT("scene_tree/rename"), TOOL_RENAME);
 			}
 			if (can_replace) {
-				menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Reload")), ED_GET_SHORTCUT("scene_tree/change_node_type"), TOOL_CHANGE_TYPE);
+				// Changed for Baby Godot: shortcut is not registered.
+				//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Reload")), ED_GET_SHORTCUT("scene_tree/change_node_type"), TOOL_CHANGE_TYPE);
+				menu->add_icon_item(get_editor_theme_icon(SNAME("Reload")), TTR("Change Type..."), TOOL_CHANGE_TYPE);
 			}
 			END_SECTION()
 		}
@@ -4043,9 +4050,13 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 			menu->add_icon_shortcut(get_editor_theme_icon(SNAME("MoveUp")), ED_GET_SHORTCUT("scene_tree/move_up"), TOOL_MOVE_UP);
 			menu->add_icon_shortcut(get_editor_theme_icon(SNAME("MoveDown")), ED_GET_SHORTCUT("scene_tree/move_down"), TOOL_MOVE_DOWN);
 			menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Reparent")), ED_GET_SHORTCUT("scene_tree/reparent"), TOOL_REPARENT);
-			menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ReparentToNewNode")), ED_GET_SHORTCUT("scene_tree/reparent_to_new_node"), TOOL_REPARENT_TO_NEW_NODE);
+			// Changed for Baby Godot: shortcut is not registered.
+			//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ReparentToNewNode")), ED_GET_SHORTCUT("scene_tree/reparent_to_new_node"), TOOL_REPARENT_TO_NEW_NODE);
+			menu->add_icon_item(get_editor_theme_icon(SNAME("ReparentToNewNode")), TTR("Reparent to New Node..."), TOOL_REPARENT_TO_NEW_NODE);
 			if (selection.size() == 1) {
-				menu->add_icon_shortcut(get_editor_theme_icon(SNAME("NewRoot")), ED_GET_SHORTCUT("scene_tree/make_root"), TOOL_MAKE_ROOT);
+				// Changed for Baby Godot: shortcut is not registered.
+				//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("NewRoot")), ED_GET_SHORTCUT("scene_tree/make_root"), TOOL_MAKE_ROOT);
+				menu->add_icon_item(get_editor_theme_icon(SNAME("NewRoot")), TTR("Make Scene Root"), TOOL_MAKE_ROOT);
 			}
 			END_SECTION()
 		}
@@ -4126,21 +4137,27 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 	if (profile_allow_editing && selection.size() > 1) {
 		//this is not a commonly used action, it makes no sense for it to be where it was nor always present.
 		BEGIN_SECTION()
-		menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Rename")), ED_GET_SHORTCUT("scene_tree/batch_rename"), TOOL_BATCH_RENAME);
+		// Changed for Baby Godot: shortcut is not registered.
+		//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Rename")), ED_GET_SHORTCUT("scene_tree/batch_rename"), TOOL_BATCH_RENAME);
+		menu->add_icon_item(get_editor_theme_icon(SNAME("Rename")), TTR("Batch Rename..."), TOOL_BATCH_RENAME);
 		END_SECTION()
 	}
 	BEGIN_SECTION()
 	// Group "open_in_editor" with "show_in_file_system", if it is available.
 	if (is_tool_scene_open_inherited_available) {
 		menu->add_icon_item(get_editor_theme_icon(SNAME("Load")), TTR("Open in Editor"), TOOL_SCENE_OPEN_INHERITED);
-		menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/open_scene_in_editor"));
+		// Disabled for Baby Godot: shortcut is not registered.
+		//menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/open_scene_in_editor"));
 	} else if (is_tool_scene_open_available) {
 		menu->add_icon_item(get_editor_theme_icon(SNAME("Load")), TTR("Open in Editor"), TOOL_SCENE_OPEN);
-		menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/open_scene_in_editor"));
+		// Disabled for Baby Godot: shortcut is not registered.
+		//menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/open_scene_in_editor"));
 	}
 
 	if (full_selection.size() == 1 && selection.front()->get()->is_instance()) {
-		menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ShowInFileSystem")), ED_GET_SHORTCUT("scene_tree/show_in_file_system"), TOOL_SHOW_IN_FILE_SYSTEM);
+		// Changed for Baby Godot: shortcut is not registered.
+		//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ShowInFileSystem")), ED_GET_SHORTCUT("scene_tree/show_in_file_system"), TOOL_SHOW_IN_FILE_SYSTEM);
+		menu->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTR("Show in FileSystem"), TOOL_SHOW_IN_FILE_SYSTEM);
 	}
 
 	menu->add_icon_item(get_editor_theme_icon(SNAME("Help")), TTR("Open Documentation"), TOOL_OPEN_DOCUMENTATION);
@@ -5038,14 +5055,16 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	button_add->set_theme_type_variation("FlatMenuButton");
 	button_add->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_tool_selected).bind(TOOL_NEW, false));
 	button_add->set_tooltip_text(TTRC("Add/Create a New Node."));
-	button_add->set_shortcut(ED_GET_SHORTCUT("scene_tree/add_child_node"));
+	// Disabled for Baby Godot: shortcut is not registered.
+	//button_add->set_shortcut(ED_GET_SHORTCUT("scene_tree/add_child_node"));
 	filter_hbc->add_child(button_add);
 
 	button_instance = memnew(Button);
 	button_instance->set_theme_type_variation("FlatMenuButton");
 	button_instance->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_tool_selected).bind(TOOL_INSTANTIATE, false));
 	button_instance->set_tooltip_text(TTRC("Instantiate a scene file as a Node. Creates an inherited scene if no root node exists."));
-	button_instance->set_shortcut(ED_GET_SHORTCUT("scene_tree/instantiate_scene"));
+	// Disabled for Baby Godot: shortcut is not registered.
+	//button_instance->set_shortcut(ED_GET_SHORTCUT("scene_tree/instantiate_scene"));
 	filter_hbc->add_child(button_instance);
 	main_vbox->add_child(filter_hbc);
 
@@ -5066,7 +5085,8 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	button_create_script->set_theme_type_variation("FlatMenuButton");
 	button_create_script->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_tool_selected).bind(TOOL_ATTACH_SCRIPT, false));
 	button_create_script->set_tooltip_text(TTRC("Attach a new or existing script to the selected node."));
-	button_create_script->set_shortcut(ED_GET_SHORTCUT("scene_tree/attach_script"));
+	// Disabled for Baby Godot: shortcut is not registered.
+	//button_create_script->set_shortcut(ED_GET_SHORTCUT("scene_tree/attach_script"));
 	filter_hbc->add_child(button_create_script);
 	button_create_script->hide();
 
@@ -5074,7 +5094,8 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	button_detach_script->set_theme_type_variation("FlatMenuButton");
 	button_detach_script->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_tool_selected).bind(TOOL_DETACH_SCRIPT, false));
 	button_detach_script->set_tooltip_text(TTRC("Detach the script from the selected node."));
-	button_detach_script->set_shortcut(ED_GET_SHORTCUT("scene_tree/detach_script"));
+	// Disabled for Baby Godot: shortcut is not registered.
+	//button_detach_script->set_shortcut(ED_GET_SHORTCUT("scene_tree/detach_script"));
 	filter_hbc->add_child(button_detach_script);
 	button_detach_script->hide();
 
@@ -5082,7 +5103,8 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	button_extend_script->set_theme_type_variation("FlatMenuButton");
 	button_extend_script->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_tool_selected).bind(TOOL_EXTEND_SCRIPT, false));
 	button_extend_script->set_tooltip_text(TTRC("Extend the script of the selected node."));
-	button_extend_script->set_shortcut(ED_GET_SHORTCUT("scene_tree/extend_script"));
+	// Disabled for Baby Godot: shortcut is not registered.
+	//button_extend_script->set_shortcut(ED_GET_SHORTCUT("scene_tree/extend_script"));
 	filter_hbc->add_child(button_extend_script);
 	button_extend_script->hide();
 
