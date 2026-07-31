@@ -114,6 +114,7 @@ const GodotFS = {
 	$GodotFS__postset: [
 		'Module["initFS"] = GodotFS.init;',
 		'Module["copyToFS"] = GodotFS.copy_to_fs;',
+		'Module["fileExists"] = GodotFS.exists;',
 	].join(''),
 	$GodotFS: {
 		// ERRNO_CODES works every odd version of emscripten, but this will break too eventually.
@@ -222,6 +223,15 @@ const GodotFS = {
 				FS.mkdirTree(dir);
 			}
 			FS.writeFile(path, new Uint8Array(buffer));
+		},
+
+		exists: function (path) {
+			try {
+				FS.stat(path);
+				return true;
+			} catch (e) {
+				return false;
+			}
 		},
 	},
 };
