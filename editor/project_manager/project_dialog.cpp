@@ -654,7 +654,7 @@ void ProjectDialog::ok_pressed() {
 				dialog_error->popup_centered();
 				return;
 			}
-			if (install_err == ERR_FILE_MISSING) {
+			if (install_err == ERR_FILE_NOT_FOUND) {
 				_set_message(TTRC("Invalid \".zip\" project file; it doesn't contain a \"project.godot\" file."), MESSAGE_ERROR);
 				return;
 			}
