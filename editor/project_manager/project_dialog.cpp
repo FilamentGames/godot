@@ -33,6 +33,7 @@
 #include "core/config/project_settings.h"
 #include "core/io/dir_access.h"
 #include "core/io/zip_io.h"
+#include "project_zip_installer.h"
 #include "core/object/callable_mp.h"
 #include "core/os/os.h"
 #include "core/version.h"
@@ -646,101 +647,28 @@ void ProjectDialog::ok_pressed() {
 		case MODE_INSTALL: {
 			ERR_FAIL_COND(zip_path.is_empty());
 
-			Ref<FileAccess> io_fa;
-			zlib_filefunc_def io = zipio_create_io(&io_fa);
-
-			unzFile pkg = unzOpen2(zip_path.utf8().get_data(), &io);
-			if (!pkg) {
+			Vector<String> failed_files;
+			Error install_err = install_project_from_zip(zip_path, path, create_dir->is_pressed(), &failed_files);
+			if (install_err == ERR_FILE_CORRUPT) {
 				dialog_error->set_text(TTRC("Error opening package file, not in ZIP format."));
 				dialog_error->popup_centered();
 				return;
 			}
-
-			// Find the first directory with a "project.godot".
-			String zip_root;
-			int ret = unzGoToFirstFile(pkg);
-			while (ret == UNZ_OK) {
-				unz_file_info info;
-				char fname[16384];
-				unzGetCurrentFileInfo(pkg, &info, fname, 16384, nullptr, 0, nullptr, 0);
-				ERR_FAIL_COND_MSG(ret != UNZ_OK, "Failed to get current file info.");
-
-				String name = String::utf8(fname);
-
-				// Skip the __MACOSX directory created by macOS's built-in file zipper.
-				if (name.begins_with("__MACOSX")) {
-					ret = unzGoToNextFile(pkg);
-					continue;
-				}
-
-				if (name.get_file() == "project.godot") {
-					zip_root = name.get_base_dir();
-					break;
-				}
-
-				ret = unzGoToNextFile(pkg);
-			}
-
-			if (ret == UNZ_END_OF_LIST_OF_FILE) {
+			if (install_err == ERR_FILE_MISSING) {
 				_set_message(TTRC("Invalid \".zip\" project file; it doesn't contain a \"project.godot\" file."), MESSAGE_ERROR);
-				unzClose(pkg);
 				return;
 			}
-
-			if (create_dir->is_pressed()) {
-				Ref<DirAccess> d = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-				if (!d->dir_exists(path) && d->make_dir(path) != OK) {
-					_set_message(TTRC("Couldn't create project directory, check permissions."), MESSAGE_ERROR);
+			if (install_err == ERR_CANT_CREATE) {
+				_set_message(TTRC("Couldn't create project directory, check permissions."), MESSAGE_ERROR);
+				return;
+			}
+			if (install_err != OK) {
+				if (failed_files.is_empty()) {
+					dialog_error->set_text(TTRC("An error occurred while extracting the project package."));
+					dialog_error->popup_centered();
 					return;
 				}
-			}
 
-			ret = unzGoToFirstFile(pkg);
-
-			Vector<String> failed_files;
-			while (ret == UNZ_OK) {
-				//get filename
-				unz_file_info info;
-				char fname[16384];
-				ret = unzGetCurrentFileInfo(pkg, &info, fname, 16384, nullptr, 0, nullptr, 0);
-				ERR_FAIL_COND_MSG(ret != UNZ_OK, "Failed to get current file info.");
-
-				String name = String::utf8(fname);
-
-				// Skip the __MACOSX directory created by macOS's built-in file zipper.
-				if (name.begins_with("__MACOSX")) {
-					ret = unzGoToNextFile(pkg);
-					continue;
-				}
-
-				String rel_path = name.trim_prefix(zip_root);
-				if (rel_path.is_empty()) { // Root.
-				} else if (rel_path.ends_with("/")) { // Directory.
-					Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-					da->make_dir(path.path_join(rel_path));
-				} else { // File.
-					Vector<uint8_t> uncomp_data;
-					uncomp_data.resize(info.uncompressed_size);
-
-					unzOpenCurrentFile(pkg);
-					ret = unzReadCurrentFile(pkg, uncomp_data.ptrw(), uncomp_data.size());
-					ERR_BREAK_MSG(ret < 0, vformat("An error occurred while attempting to read from file: %s. This file will not be used.", rel_path));
-					unzCloseCurrentFile(pkg);
-
-					Ref<FileAccess> f = FileAccess::open(path.path_join(rel_path), FileAccess::WRITE);
-					if (f.is_valid()) {
-						f->store_buffer(uncomp_data.ptr(), uncomp_data.size());
-					} else {
-						failed_files.push_back(rel_path);
-					}
-				}
-
-				ret = unzGoToNextFile(pkg);
-			}
-
-			unzClose(pkg);
-
-			if (failed_files.size()) {
 				String err_msg = TTR("The following files failed extraction from package:") + "\n\n";
 				for (int i = 0; i < failed_files.size(); i++) {
 					if (i > 15) {

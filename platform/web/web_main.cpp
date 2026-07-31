@@ -42,10 +42,10 @@
 #include "main/main.h"
 
 #ifdef TOOLS_ENABLED
+#include "core/io/dir_access.h"
 #include "core/io/file_access.h"
+#include "editor/project_manager/project_zip_installer.h"
 #include "editor/web_tools_editor_plugin.h"
-#include "scene/main/scene_tree.h"
-#include "scene/main/window.h" // SceneTree only forward declares it.
 #endif
 
 #include <emscripten/emscripten.h>
@@ -132,11 +132,35 @@ void print_web_header() {
 	print_line(vformat("Build configuration: %s.", String(", ").join(build_configuration)));
 }
 
+#ifdef TOOLS_ENABLED
+static const char *WEB_PROJECT_DIR = "/home/web_user";
+static const char *WEB_PRELOAD_ZIP = "/tmp/preload.zip";
+
+static void web_install_preload_project_if_needed() {
+	if (!FileAccess::exists(WEB_PRELOAD_ZIP)) {
+		return;
+	}
+	if (FileAccess::exists(String(WEB_PROJECT_DIR).path_join("project.godot"))) {
+		DirAccess::remove_absolute(WEB_PRELOAD_ZIP);
+		return;
+	}
+	Error err = install_project_from_zip(WEB_PRELOAD_ZIP, WEB_PROJECT_DIR, true);
+	DirAccess::remove_absolute(WEB_PRELOAD_ZIP);
+	if (err != OK) {
+		ERR_PRINT("Failed to install preload project zip.");
+	}
+}
+#endif
+
 /// When calling main, it is assumed FS is setup and synced.
 extern EMSCRIPTEN_KEEPALIVE int godot_web_main(int argc, char *argv[]) {
 	godot_init_profiler();
 
 	os = new OS_Web();
+
+#ifdef TOOLS_ENABLED
+	web_install_preload_project_if_needed();
+#endif
 
 	// Must be registered before `Main::setup()` calls `EngineDebugger::initialize()`
 	// with the `--remote-debug` URI.
@@ -172,13 +196,6 @@ extern EMSCRIPTEN_KEEPALIVE int godot_web_main(int argc, char *argv[]) {
 	int ret = Main::start();
 	os->set_exit_code(ret);
 	os->get_main_loop()->initialize();
-#ifdef TOOLS_ENABLED
-	if (Engine::get_singleton()->is_project_manager_hint() && FileAccess::exists("/tmp/preload.zip")) {
-		PackedStringArray ps;
-		ps.push_back("/tmp/preload.zip");
-		SceneTree::get_singleton()->get_root()->emit_signal(SNAME("files_dropped"), ps);
-	}
-#endif
 	emscripten_set_main_loop(main_loop_callback, -1, false);
 	// Immediately run the first iteration.
 	// We are inside an animation frame, we want to immediately draw on the newly setup canvas.

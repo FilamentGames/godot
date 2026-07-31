@@ -223,6 +223,19 @@ const Engine = (function () {
 			},
 
 			/**
+			 * Check whether a file exists in the instance's file system.
+			 *
+			 * @param {string} path The file path to check.
+			 * @returns {boolean} True if the path exists.
+			 */
+			fileExists: function (path) {
+				if (this.rtenv == null) {
+					throw new Error('Engine must be inited before checking files');
+				}
+				return this.rtenv['fileExists'](path);
+			},
+
+			/**
 			 * Request that the current instance quit.
 			 *
 			 * This is akin the user pressing the close button in the window manager, and will
@@ -258,6 +271,7 @@ const Engine = (function () {
 		Engine.prototype['start'] = Engine.prototype.start;
 		Engine.prototype['startGame'] = Engine.prototype.startGame;
 		Engine.prototype['copyToFS'] = Engine.prototype.copyToFS;
+		Engine.prototype['fileExists'] = Engine.prototype.fileExists;
 		Engine.prototype['requestQuit'] = Engine.prototype.requestQuit;
 		Engine.prototype['installServiceWorker'] = Engine.prototype.installServiceWorker;
 		// Also expose static methods as instance methods
