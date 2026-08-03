@@ -2099,6 +2099,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 #endif // defined(DEBUG_ENABLED) || defined (TOOLS_ENABLED)
 
 	OS::get_singleton()->_in_editor = editor;
+	OS::get_singleton()->prepare_project_path(project_path);
 	if (globals->setup(project_path, main_pack, false, editor) == OK) {
 #ifdef TOOLS_ENABLED
 		found_project = true;

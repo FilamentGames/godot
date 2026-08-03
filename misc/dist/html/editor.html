@@ -303,10 +303,7 @@
 		</div>
 		<script>
 			function startEditorFromProjectZip() {
-				// todo: see if the user has a saved project and load that instead
-				fetch('project.zip').then(response => response.arrayBuffer()).then(zip => {
-					startEditor(zip);
-				});
+				startEditor();
 			}
 
 			window.addEventListener('load', () => {
@@ -439,13 +436,6 @@
 			}
 
 			globalThis.godotRequestGameQuit = stopGame;
-
-			function closeEditor() { // eslint-disable-line no-unused-vars
-				closeGame();
-				if (editor) {
-					editor.requestQuit();
-				}
-			}
 
 			function startEditor(zip) {
 				const INDETERMINATE_STATUS_STEP_MS = 100;
@@ -667,16 +657,35 @@
 				} else {
 					setStatusMode('indeterminate');
 					editor.init('godot.editor').then(function () {
-						if (!zip) {
-							throw new Error('No project zip provided');
+						const launchEditor = function () {
+							showEditorDialog();
+							const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "opengl3"];
+							return editor.start({ 'args': args, 'persistentDrops': true }).then(function () {
+								setStatusMode('hidden');
+								initializing = false;
+							}).catch(function (err) {
+								displayFailureNotice(err instanceof Error ? err : new Error('Failed to start the editor. The project may be missing or invalid.'));
+							});
+						};
+
+						if (editor.fileExists('/home/web_user/project.godot')) {
+							launchEditor();
+							return;
 						}
-						editor.copyToFS('/tmp/preload.zip', zip);
-						showEditorDialog();
-						const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "opengl3"];
-						editor.start({ 'args': args, 'persistentDrops': true }).then(function () {
-							setStatusMode('hidden');
-							initializing = false;
-						});
+
+						const zipPromise = zip
+							? Promise.resolve(zip)
+							: fetch('project.zip').then(function (response) {
+								if (!response.ok) {
+									throw new Error('Failed to fetch project.zip');
+								}
+								return response.arrayBuffer();
+							});
+
+						zipPromise.then(function (zipData) {
+							editor.copyToFS('/tmp/preload.zip', zipData);
+							return launchEditor();
+						}).catch(displayFailureNotice);
 					}).catch(displayFailureNotice);
 				}
 			}
