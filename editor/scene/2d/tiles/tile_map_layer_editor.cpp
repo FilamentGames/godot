@@ -4533,7 +4533,9 @@ TileMapLayerEditor::TileMapLayerEditor() {
 
 	// TileMap editor plugins
 	tile_map_editor_plugins.push_back(memnew(TileMapLayerEditorTilesPlugin));
-	tile_map_editor_plugins.push_back(memnew(TileMapLayerEditorTerrainsPlugin));
+	
+	// Terrains dock disabled.
+	// tile_map_editor_plugins.push_back(memnew(TileMapLayerEditorTerrainsPlugin));
 
 	// TabBar.
 	tabs_bar = memnew(TabBar);
