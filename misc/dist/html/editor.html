@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+		<meta http-equiv='cache-control' content='no-cache, no-store, must-revalidate'>
+		<meta http-equiv='expires' content='0'>
+		<meta http-equiv='pragma' content='no-cache'>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
 		<meta name="author" content="Godot Engine">
@@ -25,6 +28,96 @@
 		<link rel="manifest" href="manifest.json">
 		<link rel="preload" href="inter-regular.woff2" as="font" crossorigin="anonymous">
 		<link rel="preload" href="inter-bold.woff2" as="font" crossorigin="anonymous">
+		<link rel="manifest" href="manifest.json?v=___GODOT_JS_HASH___">
+		<script>
+			window.godotEditorScriptReady = (async function () {
+				const FILE_HASHES = ___GODOT_FILE_HASHES___;
+				const FILE_HASHES_STORAGE_KEY = 'godotEditorFileHashes';
+
+				function deleteIndexedDb(name) {
+					return new Promise(function (resolve, reject) {
+						const request = indexedDB.deleteDatabase(name);
+						request.onsuccess = function () {
+							resolve();
+						};
+						request.onerror = function () {
+							reject(request.error);
+						};
+						request.onblocked = function () {
+							resolve();
+						};
+					});
+				}
+
+				window.godotClearProjectPersistentStorage = async function () {
+					await deleteIndexedDb('/home/web_user');
+				};
+
+				function fileHashesMatch(stored) {
+					if (!stored) {
+						return false;
+					}
+					for (const file in FILE_HASHES) {
+						if (stored[file] !== FILE_HASHES[file]) {
+							return false;
+						}
+					}
+					return true;
+				}
+
+				function loadGodotEditorScript() {
+					return new Promise(function (resolve, reject) {
+						const script = document.createElement('script');
+						script.src = 'godot.editor.js?v=' + encodeURIComponent(FILE_HASHES['godot.editor.js']);
+						script.onload = function () {
+							resolve();
+						};
+						script.onerror = function () {
+							reject(new Error('Failed to load godot.editor.js'));
+						};
+						document.head.appendChild(script);
+					});
+				}
+
+				let storedHashes = null;
+				try {
+					storedHashes = JSON.parse(localStorage.getItem(FILE_HASHES_STORAGE_KEY) || 'null');
+				} catch (ignored) {
+					storedHashes = null;
+				}
+
+				if (!fileHashesMatch(storedHashes)) {
+					if (storedHashes != null) {
+						if ('serviceWorker' in navigator) {
+							const registrations = await navigator.serviceWorker.getRegistrations();
+							await Promise.all(registrations.map(function (registration) {
+								return registration.unregister();
+							}));
+						}
+						if ('caches' in window) {
+							const cacheNames = await caches.keys();
+							await Promise.all(cacheNames.map(function (cacheName) {
+								return caches.delete(cacheName);
+							}));
+						}
+						if (typeof indexedDB !== 'undefined' && indexedDB.databases) {
+							const databases = await indexedDB.databases();
+							await Promise.all(databases.map(function (database) {
+								if (database.name) {
+									return deleteIndexedDb(database.name);
+								}
+								return Promise.resolve();
+							}));
+						}
+						localStorage.clear();
+						sessionStorage.clear();
+					}
+					localStorage.setItem(FILE_HASHES_STORAGE_KEY, JSON.stringify(FILE_HASHES));
+				}
+
+				await loadGodotEditorScript();
+			})();
+		</script>
 		<title>Godot Engine Web Editor (___GODOT_VERSION___)</title>
 		<style>
 			/* Use Inter in the same configuration as used in the editor (e.g. alternate lowercase `l`). */
@@ -307,34 +400,38 @@
 			}
 
 			window.addEventListener('load', () => {
-				if ('serviceWorker' in navigator) {
-					try {
-						navigator.serviceWorker.register('service.worker.js').then(function (reg) {
-							if (reg.waiting) {
-								if (!window.confirm('Do you want to update?\nClicking "OK" will reload all active instances!')) {
-									return;
-								}
-								sw.postMessage('update');
-							}
-							reg.addEventListener('updatefound', function () {
-								const update = reg.installing;
-								update.addEventListener('statechange', function () {
-									if (update.state === 'installed') {
-										// It's a new install, claim and perform aggressive caching.
-										if (!reg.active) {
-											update.postMessage('claim');
-										} else {
-											notifyUpdate(update);
-										}
+				window.godotEditorScriptReady.then(function () {
+					if ('serviceWorker' in navigator) {
+						try {
+							navigator.serviceWorker.register('service.worker.js').then(function (reg) {
+								if (reg.waiting) {
+									if (!window.confirm('Do you want to update?\nClicking "OK" will reload all active instances!')) {
+										return;
 									}
+									sw.postMessage('update');
+								}
+								reg.addEventListener('updatefound', function () {
+									const update = reg.installing;
+									update.addEventListener('statechange', function () {
+										if (update.state === 'installed') {
+											// It's a new install, claim and perform aggressive caching.
+											if (!reg.active) {
+												update.postMessage('claim');
+											} else {
+												notifyUpdate(update);
+											}
+										}
+									});
 								});
 							});
-						});
-					} catch (e) {
-						console.error('Error while registering service worker:', e);
+						} catch (e) {
+							console.error('Error while registering service worker:', e);
+						}
 					}
-				}
-				startEditorFromProjectZip();
+					startEditorFromProjectZip();
+				}).catch(function (e) {
+					console.error('Failed to initialize editor:', e);
+				});
 			});
 
 			function closeWelcomeModal(dontShowAgain) { // eslint-disable-line no-unused-vars
@@ -350,7 +447,6 @@
 				}
 			}
 		</script>
-		<script src="godot.editor.js"></script>
 		<script>
 			let editor = null;
 			let game = null;
@@ -656,7 +752,9 @@
 					displayFailureNotice('WebGL not available');
 				} else {
 					setStatusMode('indeterminate');
-					editor.init('godot.editor').then(function () {
+					window.godotClearProjectPersistentStorage().then(function () {
+						return editor.init('godot.editor');
+					}).then(function () {
 						const launchEditor = function () {
 							showEditorDialog();
 							const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "opengl3"];
@@ -668,24 +766,19 @@
 							});
 						};
 
-						if (editor.fileExists('/home/web_user/project.godot')) {
-							launchEditor();
-							return;
-						}
-
 						const zipPromise = zip
 							? Promise.resolve(zip)
-							: fetch('project.zip').then(function (response) {
+							: fetch('project.zip', { cache: 'no-store' }).then(function (response) {
 								if (!response.ok) {
 									throw new Error('Failed to fetch project.zip');
 								}
 								return response.arrayBuffer();
 							});
 
-						zipPromise.then(function (zipData) {
+						return zipPromise.then(function (zipData) {
 							editor.copyToFS('/tmp/preload.zip', zipData);
 							return launchEditor();
-						}).catch(displayFailureNotice);
+						});
 					}).catch(displayFailureNotice);
 				}
 			}

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import shlex
@@ -6,6 +7,52 @@ import subprocess
 from SCons.Util import WhereIs
 
 from platform_methods import get_build_version
+
+
+def _sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _normalize_build_node(node):
+    if isinstance(node, (list, tuple)):
+        return node[0]
+    return node
+
+
+def _make_editor_file_hash_substituters(env, binary_name, js, wasm, side):
+    worklet_js = env.File("#platform/web/js/libs/audio.worklet.js")
+    worklet_pos = env.File("#platform/web/js/libs/audio.position.worklet.js")
+    hash_sources = [
+        (binary_name + ".js", _normalize_build_node(js)),
+        (binary_name + ".wasm", _normalize_build_node(wasm)),
+        (binary_name + ".audio.worklet.js", worklet_js),
+        (binary_name + ".audio.position.worklet.js", worklet_pos),
+    ]
+    if side is not None:
+        hash_sources.append((binary_name + ".side.wasm", _normalize_build_node(side)))
+
+    hash_nodes = [node for _, node in hash_sources]
+    cached_hashes = []
+
+    def get_file_hashes():
+        if not cached_hashes:
+            hashes = {}
+            for name, node in hash_sources:
+                hashes[name] = _sha256_file(node.get_abspath())
+            cached_hashes.append(hashes)
+        return cached_hashes[0]
+
+    def subst_file_hashes():
+        return json.dumps(get_file_hashes(), separators=(",", ":"))
+
+    def subst_js_hash():
+        return get_file_hashes()[binary_name + ".js"]
+
+    return subst_file_hashes, subst_js_hash, hash_nodes
 
 
 def run_closure_compiler(target, source, env, for_signature):
@@ -71,7 +118,10 @@ def create_template_zip(env, js, wasm, side):
             "inter-bold.woff2",
         ]
         opt_cache = ["godot.editor.wasm"]
-        subst_dict = {
+        subst_file_hashes, subst_js_hash, hash_nodes = _make_editor_file_hash_substituters(
+            env, binary_name, js, wasm, side if env["dlink_enabled"] else None
+        )
+        subst_dict_base = {
             "___GODOT_VERSION___": get_build_version(False),
             "___GODOT_NAME___": "GodotEngine",
             "___GODOT_CACHE___": json.dumps(cache),
@@ -80,7 +130,13 @@ def create_template_zip(env, js, wasm, side):
             "___GODOT_THREADS_ENABLED___": "true" if env["threads"] else "false",
             "___GODOT_ENSURE_CROSSORIGIN_ISOLATION_HEADERS___": "true",
         }
-        html = env.Substfile(target="#bin/godot${PROGSUFFIX}.html", source=html, SUBST_DICT=subst_dict)
+        subst_dict_html = {
+            **subst_dict_base,
+            "___GODOT_FILE_HASHES___": subst_file_hashes,
+            "___GODOT_JS_HASH___": subst_js_hash,
+        }
+        html = env.Substfile(target="#bin/godot${PROGSUFFIX}.html", source=html, SUBST_DICT=subst_dict_html)
+        env.Depends(html, hash_nodes)
         in_files.append(html)
         out_files.append(zip_dir.File(binary_name + ".html"))
         # And logo/favicon
@@ -92,7 +148,7 @@ def create_template_zip(env, js, wasm, side):
         service_worker = env.Substfile(
             target="#bin/godot${PROGSUFFIX}.service.worker.js",
             source=service_worker,
-            SUBST_DICT=subst_dict,
+            SUBST_DICT=subst_dict_base,
         )
         in_files.append(service_worker)
         out_files.append(zip_dir.File("service.worker.js"))
