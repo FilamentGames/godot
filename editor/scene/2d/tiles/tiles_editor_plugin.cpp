@@ -570,7 +570,8 @@ TileSetEditorPlugin::TileSetEditorPlugin() {
 	editor->set_custom_minimum_size(Size2(0, 200) * EDSCALE);
 	editor->hide();
 
-	EditorDockManager::get_singleton()->add_dock(editor);
+	// TileSet dock disabled.
+	//EditorDockManager::get_singleton()->add_dock(editor);
 	editor->close();
 }
 
