@@ -172,6 +172,11 @@ void EditorMainScreen::select(int p_index) {
 		return;
 	}
 
+	if (editor_table.is_empty()) {
+		// Don't show error message when Godot is still initializing.
+		return;
+	}
+
 	ERR_FAIL_INDEX(p_index, editor_table.size());
 
 	if (!buttons[p_index]->is_visible()) { // Button hidden, no editor.

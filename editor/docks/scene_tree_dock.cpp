@@ -5134,6 +5134,9 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	button_hb->add_child(edit_remote);
 	edit_remote->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_remote_tree_selected));
 
+	// Hide remote button in Baby Godot
+	edit_remote->hide();
+
 	edit_local = memnew(Button);
 	edit_local->set_theme_type_variation(SceneStringName(FlatButton));
 	edit_local->set_h_size_flags(SIZE_EXPAND_FILL);
@@ -5142,6 +5145,9 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	edit_local->set_pressed(true);
 	button_hb->add_child(edit_local);
 	edit_local->connect(SceneStringName(pressed), callable_mp(this, &SceneTreeDock::_local_tree_selected));
+
+	// Hide local button in Baby Godot
+	edit_local->hide();
 
 	remote_tree = nullptr;
 	button_panel->hide();

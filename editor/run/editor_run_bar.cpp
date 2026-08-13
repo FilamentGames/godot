@@ -128,6 +128,9 @@ void EditorRunBar::_reset_play_buttons() {
 	play_button->set_button_icon(get_editor_theme_icon(SNAME("MainPlay")));
 	play_button->set_tooltip_text(TTRC("Run the project's main scene."));
 
+	// Reshow the play button because we actually hide it once playing in Baby Godot.
+	play_button->show();
+
 	play_scene_button->set_pressed(false);
 	play_scene_button->set_button_icon(get_editor_theme_icon(SNAME("PlayScene")));
 	play_scene_button->set_tooltip_text(TTRC("Play the currently edited scene."));
@@ -162,11 +165,18 @@ void EditorRunBar::_update_play_buttons() {
 	if (active_button) {
 		active_button->set_pressed(true);
 		active_button->set_button_icon(get_editor_theme_icon(SNAME("Reload")));
+
+		// Hide the replay button in Baby Godot so the player can't stop and restart the level.
+		active_button->hide();
 	}
 }
 
 void EditorRunBar::_update_main_panel_tabs() {
-	EditorNode::get_editor_main_screen()->set_all_buttons_disabled(is_playing());
+	EditorNode::get_editor_main_screen()->set_all_buttons_disabled(is_playing() && !pause_button->is_pressed());
+
+	// Godot isn't auto-programmed to switch tabs on pause/unpause, so implement that here.
+	const EditorMainScreen::EditorTable screen_idx = pause_button->is_pressed() ? EditorMainScreen::EditorTable::EDITOR_2D : EditorMainScreen::EditorTable::EDITOR_GAME;
+	EditorNode::get_editor_main_screen()->select(screen_idx);
 }
 
 void EditorRunBar::_movie_maker_item_pressed(int p_id) {
@@ -644,9 +654,10 @@ EditorRunBar::EditorRunBar() {
 	pause_button->set_focus_mode(Control::FOCUS_ACCESSIBILITY);
 	pause_button->set_tooltip_text(TTRC("Pause the running project's execution for debugging."));
 	pause_button->set_disabled(true);
+	pause_button->connect(SceneStringName(pressed), callable_mp(this, &EditorRunBar::_update_main_panel_tabs));
 	
 	// The engine crashes if the pause button is fully removed, so just hide it.
-	pause_button->hide();
+//	pause_button->hide();
 
 	ED_SHORTCUT("editor/pause_running_project", TTRC("Pause Running Project"), Key::F7);
 	ED_SHORTCUT_OVERRIDE("editor/pause_running_project", "macos", KeyModifierMask::META | KeyModifierMask::CTRL | Key::Y);
@@ -660,9 +671,12 @@ EditorRunBar::EditorRunBar() {
 	stop_button->set_disabled(true);
 	stop_button->connect(SceneStringName(pressed), callable_mp(this, &EditorRunBar::stop_playing));
 
-	ED_SHORTCUT("editor/stop_running_project", TTRC("Stop Running Project"), Key::F8);
-	ED_SHORTCUT_OVERRIDE("editor/stop_running_project", "macos", KeyModifierMask::META | Key::PERIOD);
-	stop_button->set_shortcut(ED_GET_SHORTCUT("editor/stop_running_project"));
+//	ED_SHORTCUT("editor/stop_running_project", TTRC("Stop Running Project"), Key::F8);
+//	ED_SHORTCUT_OVERRIDE("editor/stop_running_project", "macos", KeyModifierMask::META | Key::PERIOD);
+//	stop_button->set_shortcut(ED_GET_SHORTCUT("editor/stop_running_project"));
+
+	// Hide the stop button for Baby Godot since we just want to enable the play button.
+	stop_button->hide();
 
 	run_native = memnew(EditorRunNative);
 	//main_hbox->add_child(run_native);
