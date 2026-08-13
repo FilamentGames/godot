@@ -4053,11 +4053,11 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 			// Changed for Baby Godot: shortcut is not registered.
 			//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ReparentToNewNode")), ED_GET_SHORTCUT("scene_tree/reparent_to_new_node"), TOOL_REPARENT_TO_NEW_NODE);
 			menu->add_icon_item(get_editor_theme_icon(SNAME("ReparentToNewNode")), TTR("Reparent to New Node..."), TOOL_REPARENT_TO_NEW_NODE);
-			if (selection.size() == 1) {
+			//if (selection.size() == 1) {
 				// Changed for Baby Godot: shortcut is not registered.
 				//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("NewRoot")), ED_GET_SHORTCUT("scene_tree/make_root"), TOOL_MAKE_ROOT);
-				menu->add_icon_item(get_editor_theme_icon(SNAME("NewRoot")), TTR("Make Scene Root"), TOOL_MAKE_ROOT);
-			}
+				//menu->add_icon_item(get_editor_theme_icon(SNAME("NewRoot")), TTR("Make Scene Root"), TOOL_MAKE_ROOT);
+			//}
 			END_SECTION()
 		}
 	}
@@ -4154,11 +4154,11 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 		//menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/open_scene_in_editor"));
 	}
 
-	if (full_selection.size() == 1 && selection.front()->get()->is_instance()) {
+	//if (full_selection.size() == 1 && selection.front()->get()->is_instance()) {
 		// Changed for Baby Godot: shortcut is not registered.
 		//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ShowInFileSystem")), ED_GET_SHORTCUT("scene_tree/show_in_file_system"), TOOL_SHOW_IN_FILE_SYSTEM);
-		menu->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTR("Show in FileSystem"), TOOL_SHOW_IN_FILE_SYSTEM);
-	}
+		//menu->add_icon_item(get_editor_theme_icon(SNAME("ShowInFileSystem")), TTR("Show in FileSystem"), TOOL_SHOW_IN_FILE_SYSTEM);
+	//}
 
 	menu->add_icon_item(get_editor_theme_icon(SNAME("Help")), TTR("Open Documentation"), TOOL_OPEN_DOCUMENTATION);
 
