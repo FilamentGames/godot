@@ -4052,7 +4052,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 			menu->add_icon_shortcut(get_editor_theme_icon(SNAME("Reparent")), ED_GET_SHORTCUT("scene_tree/reparent"), TOOL_REPARENT);
 			// Changed for Baby Godot: shortcut is not registered.
 			//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ReparentToNewNode")), ED_GET_SHORTCUT("scene_tree/reparent_to_new_node"), TOOL_REPARENT_TO_NEW_NODE);
-			menu->add_icon_item(get_editor_theme_icon(SNAME("ReparentToNewNode")), TTR("Reparent to New Node..."), TOOL_REPARENT_TO_NEW_NODE);
+			//menu->add_icon_item(get_editor_theme_icon(SNAME("ReparentToNewNode")), TTR("Reparent to New Node..."), TOOL_REPARENT_TO_NEW_NODE);
 			//if (selection.size() == 1) {
 				// Changed for Baby Godot: shortcut is not registered.
 				//menu->add_icon_shortcut(get_editor_theme_icon(SNAME("NewRoot")), ED_GET_SHORTCUT("scene_tree/make_root"), TOOL_MAKE_ROOT);
