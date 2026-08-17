@@ -131,6 +131,9 @@ void EditorRunBar::_reset_play_buttons() {
 	// Reshow the play button because we actually hide it once playing in Baby Godot.
 	play_button->show();
 
+	// Reset the pause button icon
+	pause_button->set_button_icon(get_editor_theme_icon(SNAME("Pause")));
+
 	play_scene_button->set_pressed(false);
 	play_scene_button->set_button_icon(get_editor_theme_icon(SNAME("PlayScene")));
 	play_scene_button->set_tooltip_text(TTRC("Play the currently edited scene."));
@@ -177,6 +180,10 @@ void EditorRunBar::_update_main_panel_tabs() {
 	// Godot isn't auto-programmed to switch tabs on pause/unpause, so implement that here.
 	const EditorMainScreen::EditorTable screen_idx = pause_button->is_pressed() ? EditorMainScreen::EditorTable::EDITOR_2D : EditorMainScreen::EditorTable::EDITOR_GAME;
 	EditorNode::get_editor_main_screen()->select(screen_idx);
+
+	// Replace the pause icon with play if the editor is currently paused to make the lack of main play button less confusing.
+	const StringName &icon_name = pause_button->is_pressed() ? SNAME("MainPlay") : SNAME("Pause");
+	pause_button->set_button_icon(get_editor_theme_icon(icon_name));
 }
 
 void EditorRunBar::_movie_maker_item_pressed(int p_id) {
