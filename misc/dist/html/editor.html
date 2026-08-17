@@ -169,39 +169,55 @@
 				border-color: #3a3a3a;
 			}
 
-			/* Status display */
+			/* Status dialog */
 
-			#status {
-				position: absolute;
-				left: 0;
-				top: 0;
-				right: 0;
-				bottom: 0;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				/* don't consume click events - make children visible explicitly */
-				visibility: hidden;
+			dialog {
+				border: none;
+				padding: 0;
 			}
 
-			#status-progress {
-				width: 366px;
+			#dialog-status:not([open]) {
+				display: none;
+			}
+
+			#dialog-status[open] {
+				width: 200px;
+				height: 200px;
+				box-sizing: border-box;
+				display: grid;
+				grid-template-rows: 1fr 1fr;
+				padding: 1rem;
+				background-color: #1b1b1b;
+				color: #d0d0d0;
+			}
+
+			#dialog-status #status-loading {
+				grid-row: 1;
+				place-self: center;
+				font-size: 1.25rem;
+				font-weight: 700;
+			}
+
+			#dialog-status #status-progress,
+			#dialog-status #status-indeterminate,
+			#dialog-status #status-notice {
+				grid-row: 2;
+				place-self: center;
+				display: none;
+			}
+
+			#dialog-status #status-progress {
+				width: 100%;
+				max-width: 168px;
 				height: 7px;
 				background-color: #38363A;
 				border: 1px solid #444246;
 				padding: 1px;
 				box-shadow: 0 0 2px 1px #1B1C22;
 				border-radius: 2px;
-				visibility: visible;
 			}
 
-			@media only screen and (orientation:portrait) {
-				#status-progress {
-					width: 61.8%;
-				}
-			}
-
-			#status-progress-inner {
+			#dialog-status #status-progress-inner {
 				height: 100%;
 				width: 0;
 				box-sizing: border-box;
@@ -212,40 +228,52 @@
 				border-radius: 3px;
 			}
 
-			#status-indeterminate {
-				visibility: visible;
+			#dialog-status #status-indeterminate {
 				position: relative;
+				width: 42px;
+				height: 42px;
+				transform-origin: center center;
+				animation: status-indeterminate-spin 0.8s steps(8) infinite;
 			}
 
-			#status-indeterminate > div {
+			@keyframes status-indeterminate-spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			#dialog-status #status-indeterminate > div {
+				position: absolute;
+				left: calc(50% - 5.25px);
+				top: 0;
 				width: 4.5px;
 				height: 0;
 				border-style: solid;
 				border-width: 9px 3px 0 3px;
 				border-color: #2b2b2b transparent transparent transparent;
 				transform-origin: center 21px;
-				position: absolute;
 			}
 
-			#status-indeterminate > div:nth-child(1) { transform: rotate( 22.5deg); }
-			#status-indeterminate > div:nth-child(2) { transform: rotate( 67.5deg); }
-			#status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
-			#status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
-			#status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
-			#status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
-			#status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
-			#status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
+			/* Spinner animation.*/
+			#dialog-status #status-indeterminate > div:nth-child(1) {
+				transform: rotate(22.5deg);
+				border-top-color: #dfdfdf;
+			}
 
-			#status-notice {
-				margin: 0 100px;
+			/* Keyframes for the spinner animation, doing it this way keeps the animation playing while the WASM is loading. */
+			#dialog-status #status-indeterminate > div:nth-child(2) { transform: rotate(67.5deg); }
+			#dialog-status #status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
+			#dialog-status #status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
+			#dialog-status #status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
+			#dialog-status #status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
+			#dialog-status #status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
+			#dialog-status #status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
+
+			#dialog-status #status-notice {
+				max-width: 100%;
+				overflow: auto;
 				line-height: 1.3;
-				visibility: visible;
 				padding: 4px 6px;
-			}
-
-			dialog {
-				border: none;
-				padding: 0;
 			}
 
 			/* Positioned/sized from C++ via `godotGameEmbed` to track the Game View
@@ -285,10 +313,11 @@
 				</canvas>
 			</div>
 			<dialog id="dialog-status">
-				<div id="status-progress" style="display: none;" oncontextmenu="event.preventDefault();">
+				<div id="status-loading">Loading...</div>
+				<div id="status-progress" oncontextmenu="event.preventDefault();">
 					<div id="status-progress-inner"></div>
 				</div>
-				<div id="status-indeterminate" style="display: none;" oncontextmenu="event.preventDefault();">
+				<div id="status-indeterminate" oncontextmenu="event.preventDefault();">
 					<div></div>
 					<div></div>
 					<div></div>
@@ -298,7 +327,7 @@
 					<div></div>
 					<div></div>
 				</div>
-				<div id="status-notice" class="godot" style="display: none;"></div>
+				<div id="status-notice" class="godot"></div>
 			</dialog>
 		</div>
 		<script>
@@ -358,16 +387,19 @@
 			let setStatusNotice;
 			let lastGameEmbedRect = null;
 
+			const statusDialog = document.getElementById('dialog-status');
+
 			function showStatusDialog() {
-				document.getElementById('dialog-status').showModal();
+				statusDialog.showModal();
 			}
 
 			function hideStatusDialog() {
-				document.getElementById('dialog-status').close();
+				if (statusDialog.open) {
+					statusDialog.close();
+				}
 			}
 
 			function showEditorDialog() {
-				hideStatusDialog();
 				document.getElementById('dialog-editor').show();
 			}
 
@@ -438,7 +470,6 @@
 			globalThis.godotRequestGameQuit = stopGame;
 
 			function startEditor(zip) {
-				const INDETERMINATE_STATUS_STEP_MS = 100;
 				const persistentPaths = ['/home/web_user'];
 
 				let editorCanvas = document.getElementById('editor-canvas');
@@ -447,22 +478,17 @@
 				const statusProgressInner = document.getElementById('status-progress-inner');
 				const statusIndeterminate = document.getElementById('status-indeterminate');
 				const statusNotice = document.getElementById('status-notice');
+				const statusLoading = document.getElementById('status-loading');
 
 				let initializing = true;
 				let statusMode = 'hidden';
 
 				showStatusDialog();
 
-				let animationCallbacks = [];
-				function animate(time) {
-					animationCallbacks.forEach((callback) => callback(time));
-					requestAnimationFrame(animate);
-				}
-				requestAnimationFrame(animate);
-
 				let lastScale = 0;
 				let lastWidth = 0;
 				let lastHeight = 0;
+
 				function adjustCanvasDimensions() {
 					const scale = window.devicePixelRatio || 1;
 					const width = window.innerWidth;
@@ -479,41 +505,34 @@
 						lastHeight = height;
 					}
 				}
-				animationCallbacks.push(adjustCanvasDimensions);
-				adjustCanvasDimensions();
 
-				function animateStatusIndeterminate(ms) {
-					const i = Math.floor((ms / INDETERMINATE_STATUS_STEP_MS) % 8);
-					if (statusIndeterminate.children[i].style.borderTopColor === '') {
-						Array.prototype.slice.call(statusIndeterminate.children).forEach((child) => {
-							child.style.borderTopColor = '';
-						});
-						statusIndeterminate.children[i].style.borderTopColor = '#dfdfdf';
-					}
+				function animateCanvasDimensions() {
+					adjustCanvasDimensions();
+					requestAnimationFrame(animateCanvasDimensions);
 				}
+				requestAnimationFrame(animateCanvasDimensions);
 
 				setStatusMode = function (mode) {
 					if (statusMode === mode || !initializing) {
 						return;
 					}
-					[statusProgress, statusIndeterminate, statusNotice].forEach((elem) => {
+					[statusProgress, statusIndeterminate, statusNotice, statusLoading].forEach((elem) => {
 						elem.style.display = 'none';
-					});
-					animationCallbacks = animationCallbacks.filter(function (value) {
-						return (value !== animateStatusIndeterminate);
 					});
 					switch (mode) {
 					case 'progress':
+						statusLoading.style.display = 'block';
 						statusProgress.style.display = 'block';
 						break;
 					case 'indeterminate':
+						statusLoading.style.display = 'block';
 						statusIndeterminate.style.display = 'block';
-						animationCallbacks.push(animateStatusIndeterminate);
 						break;
 					case 'notice':
 						statusNotice.style.display = 'block';
 						break;
 					case 'hidden':
+						hideStatusDialog();
 						break;
 					default:
 						throw new Error('Invalid status mode');
