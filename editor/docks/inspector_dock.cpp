@@ -548,7 +548,7 @@ void InspectorDock::update(Object *p_object) {
 
 	current = p_object;
 
-	const bool is_object = p_object != nullptr;
+	const bool is_object = p_object != nullptr && p_object->get_instance_id().is_valid();
 	const bool is_resource = is_object && p_object->is_class("Resource");
 	const bool is_text_file = is_object && p_object->is_class("TextFile");
 	const bool is_node = is_object && p_object->is_class("Node");
