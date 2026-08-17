@@ -1439,6 +1439,8 @@ void GameView::_debugger_breaked(bool p_breaked, bool p_can_debug) {
 
 	if (paused) {
 		size_paused = embedded_process->get_screen_embedded_window_rect().size;
+	} else if (embed_on_play && embedded_process->is_embedding_completed() && embedded_process->get_focus_mode_with_override() != FOCUS_NONE) {
+		callable_mp((Control *)embedded_process, &Control::grab_focus).call_deferred(true);
 	}
 
 	_update_embed_window_size();

@@ -59,5 +59,14 @@ const GodotGameEmbed = {
 			embed['hide']();
 		}
 	},
+
+	godot_js_game_embed_focus__proxy: 'sync',
+	godot_js_game_embed_focus__sig: 'v',
+	godot_js_game_embed_focus: function () {
+		const embed = globalThis['godotGameEmbed'];
+		if (embed) {
+			embed['focus']();
+		}
+	},
 };
 mergeInto(LibraryManager.library, GodotGameEmbed);

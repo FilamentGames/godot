@@ -109,6 +109,11 @@ void EmbeddedProcessWeb::_update_embedded_process() {
 
 void EmbeddedProcessWeb::_notification(int p_what) {
 	switch (p_what) {
+		case NOTIFICATION_FOCUS_ENTER: {
+			if (embedding_completed) {
+				godot_js_game_embed_focus();
+			}
+		} break;
 		case NOTIFICATION_RESIZED:
 		case NOTIFICATION_VISIBILITY_CHANGED:
 		case NOTIFICATION_TRANSFORM_CHANGED: {

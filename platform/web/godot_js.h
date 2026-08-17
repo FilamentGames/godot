@@ -154,6 +154,7 @@ extern int godot_js_os_request_game_quit();
 extern void godot_js_game_embed_show(int p_x, int p_y, int p_w, int p_h);
 extern void godot_js_game_embed_update(int p_x, int p_y, int p_w, int p_h);
 extern void godot_js_game_embed_hide();
+extern void godot_js_game_embed_focus();
 
 #ifdef __cplusplus
 }
