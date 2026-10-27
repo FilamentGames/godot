@@ -21,7 +21,7 @@ env:
 
 jobs:
   web-template:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Web Build
     timeout-minutes: 60
     steps:
