@@ -40,6 +40,11 @@ jobs:
         run: |
           emcc -v
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Restore Godot build cache
         uses: ./.github/actions/godot-cache-restore
         with:
@@ -62,8 +67,14 @@ jobs:
           cache-name: web-editor
         continue-on-error: true
 
+      - name: Compress editor wasm (Brotli)
+        run: |
+          npx --yes brotli-cli compress -q 5 --br=false bin/.web_zip/godot.editor.wasm
+          ls -l bin/.web_zip/
+
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
         if: success()
         with:
           name: web-editor
+          path: bin/.web_zip
