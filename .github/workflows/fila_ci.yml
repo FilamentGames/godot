@@ -18,7 +18,7 @@ jobs:
       SCONS_FLAGS: >-
         platform=web
         target=editor
-        production=no
+        production=yes
         optimize=size_extra
         deprecated=false
         disable_xr=true

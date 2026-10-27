@@ -13,7 +13,6 @@ on:
         type: string
         required: false
         default: 4.0.11
-  workflow_dispatch:
 
 # Global Settings
 env:
@@ -23,24 +22,8 @@ env:
 jobs:
   web-template:
     runs-on: ubuntu-24.04
-    name: ${{ matrix.name }}
+    name: Web Build
     timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Template w/ threads, 64-bit (target=template_release, threads=yes, arch=wasm64)
-            cache-name: web-template
-            target: template_release
-            scons-flags: threads=yes arch=wasm64
-            artifact: true
-
-          - name: Template w/o threads, 32-bit (target=template_release, threads=no, arch=wasm32)
-            cache-name: web-nothreads-template
-            target: template_release
-            scons-flags: threads=no arch=wasm32
-            artifact: true
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -60,7 +43,7 @@ jobs:
       - name: Restore Godot build cache
         uses: ./.github/actions/godot-cache-restore
         with:
-          cache-name: ${{ matrix.cache-name }}
+          cache-name: web-editor
         continue-on-error: true
 
       - name: Setup Python and SCons
@@ -69,18 +52,18 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }}
+          scons-flags: ${{ env.SCONS_FLAGS }}
           platform: web
-          target: ${{ matrix.target }}
+          target: editor
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save
         with:
-          cache-name: ${{ matrix.cache-name }}
+          cache-name: web-editor
         continue-on-error: true
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
-        if: matrix.artifact
+        if: success()
         with:
-          name: ${{ matrix.cache-name }}
+          name: web-editor
