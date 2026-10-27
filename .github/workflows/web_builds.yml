@@ -41,9 +41,9 @@ jobs:
           emcc -v
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: lts/*
 
       - name: Restore Godot build cache
         uses: ./.github/actions/godot-cache-restore
@@ -57,7 +57,9 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }}
+          scons-flags: >-
+            playform=web
+            ${{ env.SCONS_FLAGS }}
           platform: web
           target: editor
 

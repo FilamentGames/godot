@@ -6,17 +6,32 @@ on:
       - main
       - webEditorCI
   workflow_dispatch:
+    inputs:
+      linux:
+        description: Build Linux
+        type: boolean
+        default: false
+      windows:
+        description: Build Windows
+        type: boolean
+        default: false
+      web:
+        description: Build Web
+        type: boolean
+        default: true
 
 concurrency:
   group: ${{ github.workflow }}|${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
+
   web-build:
+    name: 🌐 Web
+    if: github.event_name != 'workflow_dispatch' || inputs.web
     uses: ./.github/workflows/web_builds.yml
     with:
       SCONS_FLAGS: >-
-        platform=web
         target=editor
         production=yes
         optimize=size_extra
@@ -29,3 +44,22 @@ jobs:
         modules_enabled_by_default=false
         build_profile=profile.gdbuild
       EM_VERSION: "4.0.11"
+
+  windows-build:
+    name: 🏁 Windows
+    if: github.event_name != 'workflow_dispatch' || inputs.windows
+    uses: ./.github/workflows/windows_builds.yml
+    with:
+      SCONS_FLAGS: >-
+        target=editor
+        production=yes
+        optimize=size_extra
+        deprecated=false
+        disable_xr=true
+        disable_overrides=true
+        engine_update_check=false
+        cache_path=.cache
+        cache_limit=10
+        modules_enabled_by_default=false
+        build_profile=profile.gdbuild
+
