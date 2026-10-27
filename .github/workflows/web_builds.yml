@@ -77,5 +77,6 @@ jobs:
         if: success()
         with:
           name: web-editor
-          path: bin/.web_zip
-          include-hidden-files: true
+          path: bin/.web_zip/*
+          include-hidden: true
+          retention-days: 15
