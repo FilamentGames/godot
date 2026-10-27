@@ -5,15 +5,31 @@ on:
     branches:
       - main
       - webEditorCI
+  workflow_dispatch:
+
+env:
+  SCONS_FLAGS: >-
+    platform=web
+    target=editor
+    production=no
+    optimize=size_extra
+    deprecated=false
+    disable_xr=true
+    disable_overrides=true
+    engine_update_check=false
+    cache_path=.cache
+    cache_limit=10
+    modules_enabled_by_default=false
+    build_profile=profile.gdbuild
+  EM_VERSION: 4.0.11
 
 concurrency:
   group: ${{ github.workflow }}|${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
-  test-ci-check:
-    runs-on: ubuntu-24.04
-    name: TestCheck
-    steps:
-      - name: Hello World Test
-        run: echo "Hello World, this is a test CI."
+  web-build:
+    uses: ./.github/workflows/web_builds.yml
+    with:
+      SCONS_FLAGS: ${{ env.SCONS_FLAGS }}
+      EM_VERSION: ${{ env. EM_VERSION }}

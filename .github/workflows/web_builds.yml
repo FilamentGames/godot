@@ -1,15 +1,24 @@
 name: 🌐 Web Builds
 on:
   workflow_call:
+    inputs:
+      SCONS_FLAGS:
+        type: string
+        required: false
+        default: >-
+          dev_mode=yes
+          debug_symbols=no
+          use_closure_compiler=yes
+      EM_VERSION:
+        type: string
+        required: false
+        default: 4.0.11
   workflow_dispatch:
 
 # Global Settings
 env:
-  SCONS_FLAGS: >-
-    dev_mode=yes
-    debug_symbols=no
-    use_closure_compiler=yes
-  EM_VERSION: 4.0.11
+  SCONS_FLAGS: ${{ inputs.SCONS_FLAGS }} ||
+  EM_VERSION: ${{ inputs.EM_VERSION }}
 
 jobs:
   web-template:
