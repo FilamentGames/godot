@@ -17,7 +17,7 @@ on:
 
 # Global Settings
 env:
-  SCONS_FLAGS: ${{ inputs.SCONS_FLAGS }} ||
+  SCONS_FLAGS: ${{ inputs.SCONS_FLAGS }}
   EM_VERSION: ${{ inputs.EM_VERSION }}
 
 jobs:
