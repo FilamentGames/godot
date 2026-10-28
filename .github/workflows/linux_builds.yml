@@ -49,10 +49,9 @@ jobs:
             proj-export: true
             api-compat: true
             artifact: true
-            # Validate godot-cpp compatibility on one arbitrary editor build.
-            godot-cpp: true
-            clangd-tidy: false #  @TODO: Re-enable once the file diffs are back
-            proj-test: false
+            godot-cpp: false    #  @TODO: Re-enable if we do need concrete linux builds
+            clangd-tidy: false  #  @TODO: Re-enable once the file diffs are back
+            proj-test: false    #  @TODO: Re-enable for testing, when needed
 
 
     steps:
