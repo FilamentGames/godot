@@ -12,11 +12,6 @@ on:
 
 # Global Settings
 env:
-  SCONS_FLAGS: >-
-    ${{ inputs.SCONS_FLAGS }}
-    dev_mode=yes
-    module_text_server_fb_enabled=yes
-    debug_symbols=no
   SCONS_CACHE_MSVC_CONFIG: true
   PYTHONIOENCODING: utf8
 
@@ -67,17 +62,6 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Download pre-built ANGLE
-        shell: sh
-        id: angle-sdk
-        run: |
-          if python ./misc/scripts/install_angle.py; then
-            echo "ANGLE_ENABLED=yes" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::ANGLE SDK installation failed, building without ANGLE support."
-            echo "ANGLE_ENABLED=no" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Download WinRT components
         shell: sh
         run: python ./misc/scripts/install_winrt.py
@@ -97,7 +81,12 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }} accesskit=${{ steps.accesskit-sdk.outputs.ACCESSKIT_ENABLED }} angle=${{ steps.angle-sdk.outputs.ANGLE_ENABLED }}
+          scons-flags: >-
+            ${{ inputs.SCONS_FLAGS }}
+            ${{ matrix.scons-flags }}
+            d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }}
+            accesskit=${{ steps.accesskit-sdk.outputs.ACCESSKIT_ENABLED }}
+            angle=no
           platform: windows
           target: ${{ matrix.target }}
 
