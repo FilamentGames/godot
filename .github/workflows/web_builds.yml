@@ -58,7 +58,7 @@ jobs:
         uses: ./.github/actions/godot-build
         with:
           scons-flags: >-
-            playform=web
+            platform=web
             ${{ env.SCONS_FLAGS }}
           platform: web
           target: editor

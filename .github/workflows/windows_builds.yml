@@ -108,6 +108,8 @@ jobs:
         with:
           name: ${{ matrix.cache-name }}
 
+      # @TODO: Re-enable at later date;
+      #         Windows builds not a priority for current phase.
       # - name: Unit tests
       #   run: |
       #     ${{ matrix.bin }} --version
