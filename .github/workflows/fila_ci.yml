@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - webEditorCI
   workflow_dispatch:
     inputs:
       linux:
@@ -31,6 +30,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || inputs.linux
     uses: ./.github/workflows/linux_builds.yml
     with:
+      artifact-retention: 5
       scons-flags: >-
         target=editor
         dev_build=no
@@ -49,6 +49,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || inputs.web
     uses: ./.github/workflows/web_builds.yml
     with:
+      artifact-retention: 30
       em-version: "4.0.11"
       scons-flags: >-
         target=editor
@@ -69,6 +70,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || inputs.windows
     uses: ./.github/workflows/windows_builds.yml
     with:
+      artifact-retention: 15
       scons-flags: >-
         target=editor
         production=yes

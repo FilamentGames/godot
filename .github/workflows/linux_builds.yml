@@ -2,6 +2,11 @@ name: 🐧 Linux Builds
 on:
   workflow_call:
     inputs:
+      artifact-retention:
+        description: How long in days the build artifacts are kept
+        type: string
+        required: false
+        default: 15
       changed-files:
         description: A list of changed files, pre-filtered for parsing by clangd-tidy.
         required: false
@@ -173,7 +178,7 @@ jobs:
         if: matrix.artifact
         with:
           name: ${{ matrix.cache-name }}
-          retention-days: 15
+          retention-days: ${{ inputs.artifact-retention }}
 
       - name: Unit tests
         if: inputs.with-tests

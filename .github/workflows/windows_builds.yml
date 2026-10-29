@@ -2,6 +2,11 @@ name: 🏁 Windows Builds
 on:
   workflow_call:
     inputs:
+      artifact-retention:
+        description: How long in days the build artifacts are kept
+        type: string
+        required: false
+        default: 15
       scons-flags:
         type: string
         required: false
@@ -112,7 +117,7 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
-          retention-days: 15
+          retention-days: ${{ inputs.artifact-retention }}
 
       - name: Unit tests
         if: inputs.with-tests

@@ -2,6 +2,11 @@ name: 🌐 Web Builds
 on:
   workflow_call:
     inputs:
+      artifact-retention:
+        description: How long in days the build artifacts are kept
+        type: string
+        required: false
+        default: 15
       em-version:
         type: string
         required: false
@@ -80,4 +85,4 @@ jobs:
           name: web-editor
           path: bin/.web_zip/*
           include-hidden: true
-          retention-days: 15
+          retention-days: ${{ inputs.artifact-retention }}
