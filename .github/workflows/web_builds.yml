@@ -6,7 +6,7 @@ on:
         description: How long in days the build artifacts are kept
         type: string
         required: false
-        default: 15
+        default: "15"
       em-version:
         type: string
         required: false
