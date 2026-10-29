@@ -58,7 +58,7 @@ jobs:
         with:
           scons-flags: >-
             platform=web
-            ${{ inuputs.scons-flags }}
+            ${{ inputs.scons-flags }}
           platform: web
           target: editor
 
