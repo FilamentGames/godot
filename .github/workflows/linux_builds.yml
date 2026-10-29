@@ -43,15 +43,15 @@ jobs:
             target: editor
             scons-flags: module_mono_enabled=yes compiledb=yes
             bin: ./bin/godot.linuxbsd.editor.x86_64.mono
-            build-mono: true
-            doc-test: true
-            proj-conv: true
             proj-export: true
             api-compat: true
             artifact: true
             godot-cpp: false    #  @TODO: Re-enable if we do need concrete linux builds
             clangd-tidy: false  #  @TODO: Re-enable once the file diffs are back
             proj-test: false    #  @TODO: Re-enable for testing, when needed
+            build-mono: false   # We don't need mono for the minimal build
+            doc-test: false     # No need for docs
+            proj-conv: false    # No need for project conversion
 
 
     steps:
