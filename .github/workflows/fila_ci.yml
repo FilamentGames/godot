@@ -3,7 +3,7 @@ name: 💡 Fila-Build
 on:
   push:
     branches:
-      - miniweb
+      - feature/miniweb
   workflow_dispatch:
     inputs:
       linux:
