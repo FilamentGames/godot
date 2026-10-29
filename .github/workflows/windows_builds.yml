@@ -2,13 +2,17 @@ name: 🏁 Windows Builds
 on:
   workflow_call:
     inputs:
-      SCONS_FLAGS:
+      scons-flags:
         type: string
         required: false
         default: >-
           dev_mode=yes
           debug_symbols=no
           use_closure_compiler=yes
+      with-tests:
+        description: Yes/No on running tests.
+        type: boolean
+        required: true
 
 # Global Settings
 env:
@@ -82,7 +86,8 @@ jobs:
         uses: ./.github/actions/godot-build
         with:
           scons-flags: >-
-            ${{ inputs.SCONS_FLAGS }}
+            platform=windows
+            ${{ inputs.scons-flags }}
             ${{ matrix.scons-flags }}
             d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }}
             accesskit=${{ steps.accesskit-sdk.outputs.ACCESSKIT_ENABLED }}
@@ -107,11 +112,11 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
+          retention-days: 15
 
-      # @TODO: Re-enable at later date;
-      #         Windows builds not a priority for current phase.
-      # - name: Unit tests
-      #   run: |
-      #     ${{ matrix.bin }} --version
-      #     ${{ matrix.bin }} --help
-      #     ${{ matrix.bin }} --test --force-colors
+      - name: Unit tests
+        if: inputs.with-tests
+        run: |
+          ${{ matrix.bin }} --version
+          ${{ matrix.bin }} --help
+          ${{ matrix.bin }} --test --force-colors

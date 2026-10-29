@@ -6,7 +6,7 @@ on:
         description: A list of changed files, pre-filtered for parsing by clangd-tidy.
         required: false
         type: string
-      SCONS_FLAGS:
+      scons-flags:
         type: string
         required: false
         default: >-
@@ -16,7 +16,6 @@ on:
         description: Yes/No on running tests.
         required: true
         type: boolean
-  workflow_dispatch:
 
 # Global Settings
 env:
@@ -125,7 +124,7 @@ jobs:
         with:
           scons-flags: >-
             platform=linuxbsd
-            ${{ inputs.SCONS_FLAGS }}
+            ${{ inputs.scons-flags }}
             ${{ matrix.scons-flags }}
             accesskit=${{ steps.accesskit-sdk.outputs.ACCESSKIT_ENABLED }}
           platform: linuxbsd
@@ -174,6 +173,7 @@ jobs:
         if: matrix.artifact
         with:
           name: ${{ matrix.cache-name }}
+          retention-days: 15
 
       - name: Unit tests
         if: inputs.with-tests

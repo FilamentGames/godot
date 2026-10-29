@@ -31,8 +31,7 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || inputs.linux
     uses: ./.github/workflows/linux_builds.yml
     with:
-      with-tests: false # @TODO: Renable when ready
-      SCONS_FLAGS: >-
+      scons-flags: >-
         target=editor
         dev_build=no
         deprecated=false
@@ -43,13 +42,15 @@ jobs:
         cache_limit=10
         modules_enabled_by_default=false
         build_profile=profile.gdbuild
+      with-tests: false # @TODO: Renable when ready
 
   web-build:
     name: 🌐 Web
     if: github.event_name != 'workflow_dispatch' || inputs.web
     uses: ./.github/workflows/web_builds.yml
     with:
-      SCONS_FLAGS: >-
+      em-version: "4.0.11"
+      scons-flags: >-
         target=editor
         production=yes
         optimize=size_extra
@@ -61,14 +62,14 @@ jobs:
         cache_limit=10
         modules_enabled_by_default=false
         build_profile=profile.gdbuild
-      EM_VERSION: "4.0.11"
+      with-tests: false
 
   windows-build:
     name: 🏁 Windows
     if: github.event_name != 'workflow_dispatch' || inputs.windows
     uses: ./.github/workflows/windows_builds.yml
     with:
-      SCONS_FLAGS: >-
+      scons-flags: >-
         target=editor
         production=yes
         deprecated=false
@@ -79,4 +80,5 @@ jobs:
         cache_limit=10
         modules_enabled_by_default=false
         build_profile=profile.gdbuild
+      with-tests: false # @TODO: Renable when ready
 

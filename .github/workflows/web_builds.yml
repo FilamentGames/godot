@@ -2,22 +2,21 @@ name: 🌐 Web Builds
 on:
   workflow_call:
     inputs:
-      SCONS_FLAGS:
+      em-version:
+        type: string
+        required: false
+        default: 4.0.11
+      scons-flags:
         type: string
         required: false
         default: >-
           dev_mode=yes
           debug_symbols=no
           use_closure_compiler=yes
-      EM_VERSION:
-        type: string
-        required: false
-        default: 4.0.11
-
-# Global Settings
-env:
-  SCONS_FLAGS: ${{ inputs.SCONS_FLAGS }}
-  EM_VERSION: ${{ inputs.EM_VERSION }}
+      with-tests:
+        description: Web build has no tests currently, but this input is to unify it with the other platforms.
+        type: boolean
+        required: true
 
 jobs:
   web-template:
@@ -33,7 +32,7 @@ jobs:
       - name: Set up Emscripten latest
         uses: emscripten-core/setup-emsdk@v16
         with:
-          version: ${{ env.EM_VERSION }}
+          version: ${{ inputs.em-version }}
           no-cache: true
 
       - name: Verify Emscripten setup
@@ -59,7 +58,7 @@ jobs:
         with:
           scons-flags: >-
             platform=web
-            ${{ env.SCONS_FLAGS }}
+            ${{ inuputs.scons-flags }}
           platform: web
           target: editor
 
