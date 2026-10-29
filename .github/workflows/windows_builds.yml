@@ -1,14 +1,26 @@
 name: 🏁 Windows Builds
 on:
   workflow_call:
-  workflow_dispatch:
+    inputs:
+      artifact-retention:
+        description: How long in days the build artifacts are kept
+        type: string
+        required: false
+        default: "15"
+      scons-flags:
+        type: string
+        required: false
+        default: >-
+          dev_mode=yes
+          debug_symbols=no
+          use_closure_compiler=yes
+      with-tests:
+        description: Yes/No on running tests.
+        type: boolean
+        required: true
 
 # Global Settings
 env:
-  SCONS_FLAGS: >-
-    dev_mode=yes
-    module_text_server_fb_enabled=yes
-    debug_symbols=no
   SCONS_CACHE_MSVC_CONFIG: true
   PYTHONIOENCODING: utf8
 
@@ -31,29 +43,6 @@ jobs:
               vsproj_gen_only=no
             bin: ./bin/godot.windows.editor.x86_64.exe
             compiler: msvc
-
-          - name: Editor w/ clang-cl (target=editor, use_llvm=yes)
-            cache-name: windows-editor-clang
-            target: editor
-            scons-flags: >-
-              windows_subsystem=console
-              use_llvm=yes
-            bin: ./bin/godot.windows.editor.x86_64.llvm.exe
-            compiler: clang
-
-          - name: Template (target=template_release)
-            cache-name: windows-template
-            target: template_release
-            bin: ./bin/godot.windows.template_release.x86_64.console.exe
-            compiler: msvc
-
-          - name: Template w/ GCC (target=template_release, use_mingw=yes)
-            cache-name: windows-template-gcc
-            # MinGW takes MUCH longer to compile; save time by only targeting Template.
-            target: template_release
-            scons-flags: use_mingw=yes
-            bin: ./bin/godot.windows.template_release.x86_64.console.exe
-            compiler: gcc
 
     steps:
       - name: Checkout
@@ -82,17 +71,6 @@ jobs:
           fi
         continue-on-error: true
 
-      - name: Download pre-built ANGLE
-        shell: sh
-        id: angle-sdk
-        run: |
-          if python ./misc/scripts/install_angle.py; then
-            echo "ANGLE_ENABLED=yes" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::ANGLE SDK installation failed, building without ANGLE support."
-            echo "ANGLE_ENABLED=no" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Download WinRT components
         shell: sh
         run: python ./misc/scripts/install_winrt.py
@@ -112,7 +90,13 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }} accesskit=${{ steps.accesskit-sdk.outputs.ACCESSKIT_ENABLED }} angle=${{ steps.angle-sdk.outputs.ANGLE_ENABLED }}
+          scons-flags: >-
+            platform=windows
+            ${{ inputs.scons-flags }}
+            ${{ matrix.scons-flags }}
+            d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }}
+            accesskit=${{ steps.accesskit-sdk.outputs.ACCESSKIT_ENABLED }}
+            angle=no
           platform: windows
           target: ${{ matrix.target }}
 
@@ -133,8 +117,10 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
+          retention-days: ${{ inputs.artifact-retention }}
 
       - name: Unit tests
+        if: inputs.with-tests
         run: |
           ${{ matrix.bin }} --version
           ${{ matrix.bin }} --help

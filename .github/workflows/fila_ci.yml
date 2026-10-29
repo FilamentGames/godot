@@ -1,0 +1,86 @@
+name: 💡 Fila-Build
+
+on:
+  push:
+    branches:
+      - miniweb
+  workflow_dispatch:
+    inputs:
+      linux:
+        description: Build Linux
+        type: boolean
+        default: false
+      windows:
+        description: Build Windows
+        type: boolean
+        default: false
+      web:
+        description: Build Web
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}|${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+
+  linux-build:
+    name: 🐧 Linux
+    if: github.event_name != 'workflow_dispatch' || inputs.linux
+    uses: ./.github/workflows/linux_builds.yml
+    with:
+      artifact-retention: "5"
+      scons-flags: >-
+        target=editor
+        dev_build=no
+        deprecated=false
+        disable_xr=true
+        disable_overrides=true
+        engine_update_check=false
+        cache_path=".scons_cache"
+        cache_limit=10
+        modules_enabled_by_default=false
+        build_profile=profile.gdbuild
+      with-tests: false # @TODO: Renable when ready
+
+  web-build:
+    name: 🌐 Web
+    if: github.event_name != 'workflow_dispatch' || inputs.web
+    uses: ./.github/workflows/web_builds.yml
+    with:
+      artifact-retention: "30"
+      em-version: "4.0.11"
+      scons-flags: >-
+        target=editor
+        production=yes
+        optimize=size_extra
+        deprecated=false
+        disable_xr=true
+        disable_overrides=true
+        engine_update_check=false
+        cache_path=.scons_cache
+        cache_limit=10
+        modules_enabled_by_default=false
+        build_profile=profile.gdbuild
+      with-tests: false
+
+  windows-build:
+    name: 🏁 Windows
+    if: github.event_name != 'workflow_dispatch' || inputs.windows
+    uses: ./.github/workflows/windows_builds.yml
+    with:
+      artifact-retention: "15"
+      scons-flags: >-
+        target=editor
+        production=yes
+        deprecated=false
+        disable_xr=true
+        disable_overrides=true
+        engine_update_check=false
+        cache_path=".scons_cache"
+        cache_limit=10
+        modules_enabled_by_default=false
+        build_profile=profile.gdbuild
+      with-tests: false # @TODO: Renable when ready
+

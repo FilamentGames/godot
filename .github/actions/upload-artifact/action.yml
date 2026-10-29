@@ -9,6 +9,14 @@ inputs:
     description: The path to upload.
     required: true
     default: bin/*
+  retention-days:
+    description: How many days the artifact should be kept.
+    required: false
+    default: "60"
+  include-hidden:
+    description: Yes/No on including normally hidden files.
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -18,5 +26,6 @@ runs:
       with:
         name: ${{ inputs.name }}
         path: ${{ inputs.path }}
+        include-hidden-files: ${{ inputs.include-hidden }}
         # Default is 90 days.
-        retention-days: 60
+        retention-days: ${{ inputs.retention-days }}
