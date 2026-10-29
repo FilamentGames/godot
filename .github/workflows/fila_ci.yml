@@ -44,39 +44,39 @@ jobs:
         modules_enabled_by_default=false
         build_profile=profile.gdbuild
 
-  # web-build:
-  #   name: 🌐 Web
-  #   if: github.event_name != 'workflow_dispatch' || inputs.web
-  #   uses: ./.github/workflows/web_builds.yml
-  #   with:
-  #     SCONS_FLAGS: >-
-  #       target=editor
-  #       production=yes
-  #       optimize=size_extra
-  #       deprecated=false
-  #       disable_xr=true
-  #       disable_overrides=true
-  #       engine_update_check=false
-  #       cache_path=.scons_cache
-  #       cache_limit=10
-  #       modules_enabled_by_default=false
-  #       build_profile=profile.gdbuild
-  #     EM_VERSION: "4.0.11"
+  web-build:
+    name: 🌐 Web
+    if: github.event_name != 'workflow_dispatch' || inputs.web
+    uses: ./.github/workflows/web_builds.yml
+    with:
+      SCONS_FLAGS: >-
+        target=editor
+        production=yes
+        optimize=size_extra
+        deprecated=false
+        disable_xr=true
+        disable_overrides=true
+        engine_update_check=false
+        cache_path=.scons_cache
+        cache_limit=10
+        modules_enabled_by_default=false
+        build_profile=profile.gdbuild
+      EM_VERSION: "4.0.11"
 
-  # windows-build:
-  #   name: 🏁 Windows
-  #   if: github.event_name != 'workflow_dispatch' || inputs.windows
-  #   uses: ./.github/workflows/windows_builds.yml
-  #   with:
-  #     SCONS_FLAGS: >-
-  #       target=editor
-  #       production=yes
-  #       deprecated=false
-  #       disable_xr=true
-  #       disable_overrides=true
-  #       engine_update_check=false
-  #       cache_path=".scons_cache"
-  #       cache_limit=10
-  #       modules_enabled_by_default=false
-  #       build_profile=profile.gdbuild
+  windows-build:
+    name: 🏁 Windows
+    if: github.event_name != 'workflow_dispatch' || inputs.windows
+    uses: ./.github/workflows/windows_builds.yml
+    with:
+      SCONS_FLAGS: >-
+        target=editor
+        production=yes
+        deprecated=false
+        disable_xr=true
+        disable_overrides=true
+        engine_update_check=false
+        cache_path=".scons_cache"
+        cache_limit=10
+        modules_enabled_by_default=false
+        build_profile=profile.gdbuild
 
