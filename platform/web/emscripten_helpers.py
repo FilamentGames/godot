@@ -70,7 +70,7 @@ def create_template_zip(env, js, wasm, side):
             "inter-regular.woff2",
             "inter-bold.woff2",
         ]
-        opt_cache = ["godot.editor.wasm"]
+        opt_cache = ["godot.editor.wasm", "brotli-decode.min.js"]
         subst_dict = {
             "___GODOT_VERSION___": get_build_version(False),
             "___GODOT_NAME___": "GodotEngine",
@@ -100,6 +100,8 @@ def create_template_zip(env, js, wasm, side):
         out_files.append(zip_dir.File("manifest.json"))
         in_files.append("#misc/dist/html/offline.html")
         out_files.append(zip_dir.File("offline.html"))
+        in_files.append("#misc/dist/html/brotli-decode.min.js")
+        out_files.append(zip_dir.File("brotli-decode.min.js"))
         in_files.append("#thirdparty/fonts/Inter_Regular.woff2")
         out_files.append(zip_dir.File("inter-regular.woff2"))
         in_files.append("#thirdparty/fonts/Inter_Bold.woff2")
