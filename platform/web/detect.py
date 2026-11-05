@@ -56,6 +56,12 @@ def get_opts():
             "dlink_enabled", "Enable WebAssembly dynamic linking (GDExtension support). Produces bigger binaries", False
         ),
         BoolVariable("use_closure_compiler", "Use closure compiler to minimize JavaScript code", False),
+        BoolVariable("brotli_decompression", "Include client-side Brotli decompression in the web editor HTML", False),
+        BoolVariable(
+            "wait_for_coors",
+            "Make the web editor wait for the service worker to provide cross-origin isolation (reloads once)",
+            False,
+        ),
         BoolVariable(
             "proxy_to_pthread",
             "Use Emscripten PROXY_TO_PTHREAD option to run the main application code to a separate thread",

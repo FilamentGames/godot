@@ -332,36 +332,7 @@
 		</div>
 		<script>
 			function startEditorFromProjectZip() {
-				if (!window.crossOriginIsolated && 'serviceWorker' in navigator) {
-						// Not isolated yet: the service worker supplies COOP/COEP once it controls the page.
-						// Reload when it takes control, and don't start the (threaded) engine before then.
-						// The sessionStorage flag guards against reload loops.
-						let alreadyReloaded = false;
-						try {
-							alreadyReloaded = !!sessionStorage.getItem('coiReload');
-							sessionStorage.setItem('coiReload', '1');
-						} catch (e) {
-							alreadyReloaded = true; // Can't guard against loops, so don't reload.
-						}
-						if (!alreadyReloaded) {
-							navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true });
-							navigator.serviceWorker.ready.then(function (reg) {
-								if (navigator.serviceWorker.controller) {
-									location.reload();
-								} else if (reg.active) {
-									reg.active.postMessage('claim');
-								}
-							});
-							// If the worker never activates (install failure, blocked in private mode), don't hang:
-							// start anyway. A threaded build will then report its own isolation error.
-							setTimeout(function () {
-								if (!window.crossOriginIsolated) {
-									startEditor();
-								}
-							}, 10000);
-							return; // Wait for the reload.
-						}
-					}
+___GODOT_COI_RELOAD___
 					startEditor();
 			}
 
@@ -409,70 +380,7 @@
 				}
 			}
 		</script>
-		<script>
-				// The .wasm files are stored brotli-compressed. Hosts that can't send
-				// `Content-Encoding: br` (e.g. GitHub Pages) serve the raw brotli bytes, so decode them here
-				// and hand the engine a normal WASM response. Responses that arrive already decoded
-				// (e.g. from serve.py, which sends the header) are passed through untouched.
-				(function () {
-					const nativeFetch = window.fetch.bind(window);
-					const isWasm = (b) => b.length > 3 && b[0] === 0x00 && b[1] === 0x61 && b[2] === 0x73 && b[3] === 0x6d;
-
-					// Native brotli streams: the constructor throws where the format isn't supported.
-					const hasNativeBrotli = (function () {
-						try {
-							new DecompressionStream('brotli');
-							return true;
-						} catch (e) {
-							return false;
-						}
-					})();
-
-					let fallbackPromise = null;
-					function loadFallbackDecoder() {
-						if (!fallbackPromise) {
-							fallbackPromise = import('./brotli-decode.min.js').then(function (mod) {
-								return mod.BrotliDecode || mod.default;
-							});
-						}
-						return fallbackPromise;
-					}
-
-					async function brotliDecode(raw) {
-						if (hasNativeBrotli) {
-							const stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('brotli'));
-							return new Uint8Array(await new Response(stream).arrayBuffer());
-						}
-						const decode = await loadFallbackDecoder();
-						const out = decode(new Int8Array(raw.buffer, raw.byteOffset, raw.byteLength));
-						return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
-					}
-
-					window.fetch = async function (input, init) {
-						const response = await nativeFetch(input, init);
-						const url = typeof input === 'string' ? input : (input.url || String(input));
-						if (!response.ok || !url.split('?')[0].endsWith('.wasm')) {
-							return response;
-						}
-						// Browser already brotli-decoded it (e.g. serve.py sends Content-Encoding: br).
-						// Pass through unbuffered so the engine's download progress keeps working.
-						if (response.headers.get('Content-Encoding') === 'br') {
-							return response;
-						}
-						let bytes = new Uint8Array(await response.arrayBuffer());
-						if (!isWasm(bytes)) {
-							bytes = await brotliDecode(bytes);
-						}
-						return new Response(bytes, {
-							status: 200,
-							headers: {
-								'Content-Type': 'application/wasm',
-								'Content-Length': String(bytes.length),
-							},
-						});
-					};
-				})();
-			</script>
+___GODOT_BROTLI_SCRIPT___
 			<script src="godot.editor.js"></script>
 		<script>
 			let editor = null;

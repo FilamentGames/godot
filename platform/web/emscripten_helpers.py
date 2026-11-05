@@ -70,8 +70,20 @@ def create_template_zip(env, js, wasm, side):
             "inter-regular.woff2",
             "inter-bold.woff2",
         ]
-        opt_cache = ["godot.editor.wasm", "brotli-decode.min.js"]
+        include_brotli = env["brotli_decompression"]
+        opt_cache = ["godot.editor.wasm"]
+        brotli_script = ""
+        coi_reload = ""
+        if include_brotli:
+            opt_cache.append("brotli-decode.min.js")
+            with open(env.File("#misc/dist/html/brotli-fetch.html.part").abspath, encoding="utf-8") as f:
+                brotli_script = f.read().rstrip("\n")
+        if env["wait_for_coors"]:
+            with open(env.File("#misc/dist/html/coi-reload.html.part").abspath, encoding="utf-8") as f:
+                coi_reload = f.read().rstrip("\n")
         subst_dict = {
+            "___GODOT_BROTLI_SCRIPT___": brotli_script,
+            "___GODOT_COI_RELOAD___": coi_reload,
             "___GODOT_VERSION___": get_build_version(False),
             "___GODOT_NAME___": "GodotEngine",
             "___GODOT_CACHE___": json.dumps(cache),
@@ -100,8 +112,9 @@ def create_template_zip(env, js, wasm, side):
         out_files.append(zip_dir.File("manifest.json"))
         in_files.append("#misc/dist/html/offline.html")
         out_files.append(zip_dir.File("offline.html"))
-        in_files.append("#misc/dist/html/brotli-decode.min.js")
-        out_files.append(zip_dir.File("brotli-decode.min.js"))
+        if include_brotli:
+            in_files.append("#misc/dist/html/brotli-decode.min.js")
+            out_files.append(zip_dir.File("brotli-decode.min.js"))
         in_files.append("#thirdparty/fonts/Inter_Regular.woff2")
         out_files.append(zip_dir.File("inter-regular.woff2"))
         in_files.append("#thirdparty/fonts/Inter_Bold.woff2")
