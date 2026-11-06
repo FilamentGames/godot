@@ -49,10 +49,26 @@ echo "Emscripten Activated ($(emcc -v 2>&1 | head -n1))"
 
 dev_build=false
 clean_build=false
+include_decompression=false
+wait_for_coors=false
 for arg in "$@"; do
     case "$arg" in
+        --with-cors) wait_for_coors=true ;;
+        --with-cors=*)
+            case "${arg#*=}" in
+                true|1|yes) wait_for_coors=true ;;
+                *) wait_for_coors=false ;;
+            esac
+            ;;
         --dev) dev_build=true ;;
         --clean) clean_build=true ;;
+        --with-decompression) include_decompression=true ;;
+        --with-decompression=*)
+            case "${arg#*=}" in
+                true|1|yes) include_decompression=true ;;
+                *) include_decompression=false ;;
+            esac
+            ;;
     esac
 done
 
@@ -79,7 +95,12 @@ scons_args=(
     cache_limit=10
     modules_enabled_by_default=false
     build_profile=profile.gdbuild
+    brotli_decompression="$include_decompression"
+    wait_for_coors="$wait_for_coors"
 )
+
+echo "Include Brotli decompression: $include_decompression"
+echo "Wait for cross-origin isolation: $wait_for_coors"
 
 if [[ "$dev_build" == true ]]; then
     scons_args+=(

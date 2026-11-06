@@ -1,0 +1,30 @@
+				if (!window.crossOriginIsolated && 'serviceWorker' in navigator) {
+						// Not isolated yet: the service worker supplies COOP/COEP once it controls the page.
+						// Reload when it takes control, and don't start the (threaded) engine before then.
+						// The sessionStorage flag guards against reload loops.
+						let alreadyReloaded = false;
+						try {
+							alreadyReloaded = !!sessionStorage.getItem('coiReload');
+							sessionStorage.setItem('coiReload', '1');
+						} catch (e) {
+							alreadyReloaded = true; // Can't guard against loops, so don't reload.
+						}
+						if (!alreadyReloaded) {
+							navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true });
+							navigator.serviceWorker.ready.then(function (reg) {
+								if (navigator.serviceWorker.controller) {
+									location.reload();
+								} else if (reg.active) {
+									reg.active.postMessage('claim');
+								}
+							});
+							// If the worker never activates (install failure, blocked in private mode), don't hang:
+							// start anyway. A threaded build will then report its own isolation error.
+							setTimeout(function () {
+								if (!window.crossOriginIsolated) {
+									startEditor();
+								}
+							}, 10000);
+							return; // Wait for the reload.
+						}
+					}

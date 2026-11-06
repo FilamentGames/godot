@@ -1,5 +1,10 @@
 # !/usr/bin/env pwsh
 
+param(
+    [switch]$WithDecompression = $false,
+    [switch]$WithCORS = $false
+)
+
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     Write-Error "Python is not installed or not on PATH."
     exit 1
@@ -44,6 +49,8 @@ Write-Host "Emscripten Activated $((emcc -v 2>&1 | Select-Object -First 1))`n"
 
 $devBuild = $args -contains "--dev"
 $cleanBuild = $args -contains "--clean"
+Write-Host "With decompression: $WithDecompression"
+Write-Host "With CORS wait: $WithCORS`n"
 if ($devBuild) {
     $production = "no"
     $optimize = "none"
@@ -66,7 +73,9 @@ $sconsArgs = @(
     "cache_path=.cache",
     "cache_limit=10",
     "modules_enabled_by_default=false",
-    "build_profile=profile.gdbuild"
+    "build_profile=profile.gdbuild",
+    "brotli_decompression=$(if ($WithDecompression) { 'true' } else { 'false' })",
+    "wait_for_coors=$(if ($WithCORS) { 'true' } else { 'false' })"
 )
 
 if ($devBuild) {
