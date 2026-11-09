@@ -97,10 +97,11 @@ void EditorMainScreen::save_layout_to_config(Ref<ConfigFile> p_config_file, cons
 }
 
 void EditorMainScreen::load_layout_from_config(Ref<ConfigFile> p_config_file, const String &p_section) {
-	int selected_main_editor_idx = p_config_file->get_value(p_section, "selected_main_editor_idx", -1);
-	if (selected_main_editor_idx >= 0 && selected_main_editor_idx < buttons.size()) {
-		callable_mp(this, &EditorMainScreen::select).call_deferred(selected_main_editor_idx);
-	}
+	// In Baby Godot, skip this loading setup since we're manually switching to the title screen each time.
+//	int selected_main_editor_idx = p_config_file->get_value(p_section, "selected_main_editor_idx", -1);
+//	if (selected_main_editor_idx >= 0 && selected_main_editor_idx < buttons.size()) {
+//		callable_mp(this, &EditorMainScreen::select).call_deferred(selected_main_editor_idx);
+//	}
 }
 
 void EditorMainScreen::set_button_enabled(int p_index, bool p_enabled) {
