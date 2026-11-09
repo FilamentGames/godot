@@ -534,6 +534,12 @@ void EditorDockManager::load_docks_from_config(Ref<ConfigFile> p_layout, const S
 		dock_map[dock->get_effective_layout_key()] = dock;
 	}
 
+	// List of dock names that are managed by Baby Godot and therefore shouldn't be handled here.
+	const String managed_docks[] = {
+		"Scene",
+		"Inspector"
+	};
+
 	// Load docks by slot. Index -1 is for docks that have no slot.
 	for (int i = -1; i < EditorDock::DOCK_SLOT_MAX; i++) {
 		const String key = DockTabContainer::get_config_key(i);
@@ -551,7 +557,15 @@ void EditorDockManager::load_docks_from_config(Ref<ConfigFile> p_layout, const S
 			}
 			EditorDock *dock = dock_map[name];
 
-			if (!dock->enabled) {
+			// Skip docks that are handled by Baby Godot.
+			bool is_skipped = false;
+			for (const String &skipped : managed_docks) {
+				if (name == skipped) {
+					is_skipped = true;
+					break;
+				}
+			}
+			if (!dock->enabled || is_skipped) {
 				// Don't open disabled docks.
 				dock->load_layout_from_config(p_layout, section_name);
 				continue;
