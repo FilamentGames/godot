@@ -18,7 +18,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # need existing tags
+          # need existing tags
+          fetch-depth: 0
 
       - name: Read fila-SEMVER
         id: ver
