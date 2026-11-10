@@ -86,3 +86,14 @@ jobs:
           path: bin/.web_zip/*
           include-hidden: true
           retention-days: ${{ inputs.artifact-retention }}
+
+  release:
+    name: 🏷️ Release
+    needs: web-template
+    if: success() && contains(fromJSON('["feature/miniweb","ciKickoff"]'), github.ref_name)
+    permissions:
+      contents: write
+    uses: ./.github/workflows/web_release.yml
+    with:
+      artifact-name: web-editor
+

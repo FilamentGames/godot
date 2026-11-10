@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/miniweb
+      - ciKickoff
   workflow_dispatch:
     inputs:
       linux:
@@ -48,6 +49,8 @@ jobs:
     name: 🌐 Web
     if: github.event_name != 'workflow_dispatch' || inputs.web
     uses: ./.github/workflows/web_builds.yml
+    permissions:
+      contents: write # needed by the release job in web_builds.yml
     with:
       artifact-retention: "30"
       em-version: "4.0.11"
