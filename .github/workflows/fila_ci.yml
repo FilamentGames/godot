@@ -66,6 +66,8 @@ jobs:
         cache_limit=10
         modules_enabled_by_default=false
         build_profile=profile.gdbuild
+        brotli_decompression=true
+        wait_for_coors=true
       with-tests: false
 
   windows-build:

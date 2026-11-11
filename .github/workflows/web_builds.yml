@@ -17,7 +17,10 @@ on:
         default: >-
           dev_mode=yes
           debug_symbols=no
+          build_profile.gdbuild
           use_closure_compiler=yes
+          brotli_decompression=true
+          wait_for_coors=true
       with-tests:
         description: Web build has no tests currently, but this input is to unify it with the other platforms.
         type: boolean
