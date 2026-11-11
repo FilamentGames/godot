@@ -107,7 +107,7 @@ jobs:
           GH_TOKEN: ${{ secrets.DOWNSTREAM_BUILD_TOKEN }}
           MODPLAT_REPO: FilamentGames/moddable-platformer
           # Branch in modPlat whose pages.yml should run
-          MODPLAT_REF: ${{ github.ref_name == 'feature/miniweb' && 'feature/miniweb' || 'staging' }}
+          MODPLAT_REF: pagesCI
         run: |
           gh workflow run pages.yml --repo "$MODPLAT_REPO" --ref "$MODPLAT_REF"
           echo "::notice::Dispatched pages.yml on $MODPLAT_REPO@$MODPLAT_REF for ${{ needs.release.outputs.tag }}"
