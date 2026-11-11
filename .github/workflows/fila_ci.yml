@@ -89,3 +89,17 @@ jobs:
         build_profile=profile.gdbuild
       with-tests: false # @TODO: Renable when ready
 
+  release:
+    name: 🏷️ Release
+    needs: [web-build, linux-build, windows-build]
+    # Web must succeed (modPlat depends on it); Linux/Windows are attached only if they succeeded.
+    if: >-
+      !cancelled() && needs.web-build.result == 'success'
+      && contains(fromJSON('["feature/miniweb","ciKickoff"]'), github.ref_name)
+    permissions:
+      contents: write # create the tag and release
+    uses: ./.github/workflows/fila_release.yml
+    with:
+      include-linux: ${{ needs.linux-build.result == 'success' }}
+      include-windows: ${{ needs.windows-build.result == 'success' }}
+    secrets: inherit

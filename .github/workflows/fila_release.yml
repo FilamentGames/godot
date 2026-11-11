@@ -1,0 +1,113 @@
+name: 🏷️ Release
+on:
+  workflow_call:
+    inputs:
+      include-linux:
+        description: Attach the Linux editor build (linux-editor-mono artifact)
+        type: boolean
+        required: false
+        default: false
+      include-windows:
+        description: Attach the Windows editor build (windows-editor artifact)
+        type: boolean
+        required: false
+        default: false
+    secrets:
+      DOWNSTREAM_BUILD_TOKEN:
+        description: Token with Actions write access on the modPlat repo
+        required: false
+
+jobs:
+  release:
+    name: Tag & Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.ver.outputs.tag }}
+      skip: ${{ steps.ver.outputs.skip }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # need existing tags
+          fetch-depth: 0
+
+      - name: Read fila-SEMVER
+        id: ver
+        run: |
+          v=$(tr -d '[:space:]' < fila-SEMVER)
+          [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Invalid SEMVER '$v'"; exit 1; }
+          tag="fila-$v"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::notice::Tag $tag already exists, skipping release"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download web build artifact
+        if: steps.ver.outputs.skip != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: web-editor
+          path: web-editor
+
+      - name: Download Linux build artifact
+        if: steps.ver.outputs.skip != 'true' && inputs.include-linux
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-editor-mono
+          path: linux-editor
+
+      - name: Download Windows build artifact
+        if: steps.ver.outputs.skip != 'true' && inputs.include-windows
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-editor
+          path: windows-editor
+
+      - name: Tag and create release
+        if: steps.ver.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          PRERELEASE: ${{ github.ref_name != 'feature/miniweb' && '--prerelease' || '' }}
+          INCLUDE_LINUX: ${{ inputs.include-linux }}
+          INCLUDE_WINDOWS: ${{ inputs.include-windows }}
+        run: |
+          # The web zip keeps the "web-editor-" prefix: modPlat's pages.yml selects on it.
+          assets=("web-editor-$TAG.zip")
+          (cd web-editor && zip -r "../web-editor-$TAG.zip" .)
+          notes="**Default download:** \`web-editor-$TAG.zip\` (web editor)."
+
+          if [ "$INCLUDE_LINUX" = "true" ]; then
+            # upload-artifact drops file permissions, so restore the exec bit.
+            chmod +x linux-editor/godot.* 2>/dev/null || true
+            (cd linux-editor && zip -r "../linux-editor-$TAG.zip" .)
+            assets+=("linux-editor-$TAG.zip")
+            notes+=$'\n'"Also: \`linux-editor-$TAG.zip\` (Linux editor)."
+          fi
+          if [ "$INCLUDE_WINDOWS" = "true" ]; then
+            (cd windows-editor && zip -r "../windows-editor-$TAG.zip" .)
+            assets+=("windows-editor-$TAG.zip")
+            notes+=$'\n'"Also: \`windows-editor-$TAG.zip\` (Windows editor)."
+          fi
+
+          gh release create "$TAG" "${assets[@]}" \
+            --target "$GITHUB_SHA" --title "$TAG" --notes "$notes" --generate-notes $PRERELEASE
+
+  trigger-modplat:
+    name: Trigger modPlat Pages build
+    needs: release
+    if: needs.release.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch pages.yml in modPlat
+        env:
+          GH_TOKEN: ${{ secrets.DOWNSTREAM_BUILD_TOKEN }}
+          MODPLAT_REPO: FilamentGames/moddable-platformer
+          # Branch in modPlat whose pages.yml should run
+          MODPLAT_REF: ${{ github.ref_name == 'feature/miniweb' && 'feature/miniweb' || 'staging' }}
+        run: |
+          gh workflow run pages.yml --repo "$MODPLAT_REPO" --ref "$MODPLAT_REF"
+          echo "::notice::Dispatched pages.yml on $MODPLAT_REPO@$MODPLAT_REF for ${{ needs.release.outputs.tag }}"
