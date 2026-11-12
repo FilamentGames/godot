@@ -92,7 +92,7 @@ jobs:
   release:
     name: 🏷️ Release
     needs: [web-build, linux-build, windows-build]
-    # Web must succeed (modPlat depends on it); Linux/Windows are attached only if they succeeded.
+    # Web must succeed (downstream-deploy depends on it); Linux/Windows are attached only if they succeeded.
     if: >-
       !cancelled() && needs.web-build.result == 'success'
       && contains(fromJSON('["feature/miniweb","ciKickoff"]'), github.ref_name)

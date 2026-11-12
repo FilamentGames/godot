@@ -14,7 +14,7 @@ on:
         default: false
     secrets:
       DOWNSTREAM_BUILD_TOKEN:
-        description: Token with Actions write access on the modPlat repo
+        description: Token with Actions write access on the FilamentGames/moddable-platformer repo
         required: false
 
 jobs:
@@ -75,7 +75,7 @@ jobs:
           INCLUDE_LINUX: ${{ inputs.include-linux }}
           INCLUDE_WINDOWS: ${{ inputs.include-windows }}
         run: |
-          # The web zip keeps the "web-editor-" prefix: modPlat's pages.yml selects on it.
+          # The web zip keeps the "web-editor-" prefix: moddble-platformer's pages.yml selects on it.
           assets=("web-editor-$TAG.zip")
           (cd web-editor && zip -r "../web-editor-$TAG.zip" .)
           notes="**Default download:** \`web-editor-$TAG.zip\` (web editor)."
@@ -96,18 +96,18 @@ jobs:
           gh release create "$TAG" "${assets[@]}" \
             --target "$GITHUB_SHA" --title "$TAG" --notes "$notes" --generate-notes $PRERELEASE
 
-  trigger-modplat:
-    name: Trigger modPlat Pages build
+  trigger-downstream-deploy:
+    name: Trigger Downstream Moddable-Platformer build
     needs: release
     if: needs.release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Dispatch pages.yml in modPlat
+      - name: Dispatch pages.yml in FilamentGames/moddable-platformer
         env:
           GH_TOKEN: ${{ secrets.DOWNSTREAM_BUILD_TOKEN }}
-          MODPLAT_REPO: FilamentGames/moddable-platformer
-          # Branch in modPlat whose pages.yml should run
-          MODPLAT_REF: pagesCI
+          DOWNSTREAM_REPO: FilamentGames/moddable-platformer
+          # Branch in FilamentGames/moddable-platformer whose pages.yml should run
+          DOWNSTREAM_REF: pagesCI
         run: |
-          gh workflow run pages.yml --repo "$MODPLAT_REPO" --ref "$MODPLAT_REF"
-          echo "::notice::Dispatched pages.yml on $MODPLAT_REPO@$MODPLAT_REF for ${{ needs.release.outputs.tag }}"
+          gh workflow run pages.yml --repo "$DOWNSTREAM_REPO" --ref "$DOWNSTREAM_REF"
+          echo "::notice::Dispatched pages.yml on $DOWNSTREAM_REPO@$DOWNSTREAM_REF for ${{ needs.release.outputs.tag }}"
