@@ -109,5 +109,5 @@ jobs:
           # Branch in FilamentGames/moddable-platformer whose pages.yml should run
           DOWNSTREAM_REF: main
         run: |
-          gh workflow run pages.yml --repo "$DOWNSTREAM_REPO" --ref "$DOWNSTREAM_REF"
-          echo "::notice::Dispatched pages.yml on $DOWNSTREAM_REPO@$DOWNSTREAM_REF for ${{ needs.release.outputs.tag }}"
+          gh workflow run build.yml --repo "$DOWNSTREAM_REPO" --ref "$DOWNSTREAM_REF"
+          echo "::notice::Dispatched build.yml on $DOWNSTREAM_REPO@$DOWNSTREAM_REF for ${{ needs.release.outputs.tag }}"
