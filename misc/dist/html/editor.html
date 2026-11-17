@@ -692,26 +692,88 @@ ___GODOT_BROTLI_SCRIPT___
 							});
 						};
 
+						const chapter = getChapter();
+						const chapterKey = chapter || '';
+
 						if (editor.fileExists('/home/web_user/project.godot')) {
-							launchEditor();
+							// Reuse persisted project only if it belongs to the requested chapter.
+							let loaded = null;
+							try { loaded = localStorage.getItem('loadedChapter'); } catch (e) { /* ignore */ }
+							if (zip || loaded === null || loaded === chapterKey) {
+								launchEditor();
+								return;
+							}
+							// Different chapter requested: confirm before replacing saved work.
+							if (!window.confirm('Replace your current work with chapter "' + (chapter || 'project') + '"? Unsaved changes will be lost.')) {
+								launchEditor();
+								return;
+							}
+							// Fall through to fetch the new chapter. The old project is cleared
+							// by the preload zip import (see clearProject below).
+							clearProject();
+						}
+
+						let zipUrl;
+						try {
+							zipUrl = zip ? null : getChapterZipUrl(chapter);
+						} catch (err) {
+							displayFailureNotice(err);
 							return;
 						}
 
 						const zipPromise = zip
 							? Promise.resolve(zip)
-							: fetch('project.zip').then(function (response) {
+							: fetch(zipUrl).then(function (response) {
 								if (!response.ok) {
-									throw new Error('Failed to fetch project.zip');
+									throw new Error('Failed to fetch ' + zipUrl);
 								}
 								return response.arrayBuffer();
 							});
 
 						zipPromise.then(function (zipData) {
 							editor.copyToFS('/tmp/preload.zip', zipData);
+							try { localStorage.setItem('loadedChapter', chapterKey); } catch (e) { /* ignore */ }
 							return launchEditor();
 						}).catch(displayFailureNotice);
 					}).catch(displayFailureNotice);
 				}
+			}
+
+			function getChapter() {
+				return new URLSearchParams(window.location.search).get('chapter');
+			}
+
+			function getChapterZipUrl(chapter) {
+				if (!chapter) return 'projects/project.zip'; // default chapter
+				if (!/^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/.test(chapter)) {
+					throw new Error('Invalid chapter: ' + chapter);
+				}
+				return 'projects/' + chapter + '.zip';
+			}
+
+			function clearProject() {
+				// Remove the persisted project so the new chapter's zip replaces it.
+				const FS = editor.rtenv && editor.rtenv['FS'];
+				if (!FS) {
+					console.warn('Emscripten FS not exposed; old project files may remain.');
+					return;
+				}
+				const rmrf = function (path) {
+					let entries;
+					try { entries = FS.readdir(path); } catch (e) { return; }
+					entries.forEach(function (name) {
+						if (name === '.' || name === '..') return;
+						const full = path + '/' + name;
+						const stat = FS.stat(full);
+						if (FS.isDir(stat.mode)) {
+							rmrf(full);
+							FS.rmdir(full);
+						} else {
+							FS.unlink(full);
+						}
+					});
+				};
+				try { rmrf('/home/web_user'); } catch (e) { console.warn('Failed to clear project', e); }
 			}
 
 			function preloadZip(target) {
