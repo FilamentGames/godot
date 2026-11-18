@@ -693,7 +693,7 @@ ___GODOT_BROTLI_SCRIPT___
 						};
 
 						const chapter = getChapter();
-						const chapterKey = chapter || '';
+						const chapterKey = (chapter || 'main') + (new URLSearchParams(window.location.search).get('debug') === '1' ? ':debug' : '');
 
 						if (editor.fileExists('/home/web_user/project.godot')) {
 							// Reuse persisted project only if it belongs to the requested chapter.
@@ -744,11 +744,12 @@ ___GODOT_BROTLI_SCRIPT___
 			}
 
 			function getChapterZipUrl(chapter) {
-				if (!chapter) return 'projects/project.zip'; // default chapter
-				if (!/^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$/.test(chapter)) {
+				if (!chapter) chapter = 'main'; // default chapter
+				if (!/^[A-Za-z0-9_-]+$/.test(chapter)) {
 					throw new Error('Invalid chapter: ' + chapter);
 				}
-				return 'projects/' + chapter + '.zip';
+				const debug = new URLSearchParams(window.location.search).get('debug') === '1';
+				return 'chapters/' + chapter + '/' + (debug ? 'debug-project.zip' : 'project.zip');
 			}
 
 			function clearProject() {
