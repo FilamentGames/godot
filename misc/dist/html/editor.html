@@ -680,7 +680,26 @@ ___GODOT_BROTLI_SCRIPT___
 					displayFailureNotice('WebGL not available');
 				} else {
 					setStatusMode('indeterminate');
-					editor.init('godot.editor').then(function () {
+					const chapter = getChapter();
+					const chapterKey = (chapter || 'main') + (new URLSearchParams(window.location.search).get('debug') === '1' ? ':debug' : '');
+					console.log('[chapter] project: ' + (chapter || 'main') + (chapter ? '' : ' (default)'));
+					console.log('[chapter] debug mode: ' + (new URLSearchParams(window.location.search).get('debug') === '1' ? 'ON' : 'OFF'));
+
+					// If a different chapter is requested than the one saved in the browser, confirm and wipe the
+					// persisted project (IndexedDB) before the editor mounts it. The Emscripten FS is not exposed
+					// to the page, so it can't be cleared after init.
+					let loaded = null;
+					try { loaded = localStorage.getItem('loadedChapter'); } catch (e) { /* ignore */ }
+					let resetPromise = Promise.resolve();
+					if (!zip && loaded !== null && loaded !== chapterKey) {
+						if (window.confirm('Replace your current work with "' + chapterKey + '"? Unsaved changes will be lost.')) {
+							resetPromise = clearPersistedProject();
+						}
+					}
+
+					resetPromise.then(function () {
+						return editor.init('godot.editor');
+					}).then(function () {
 						const launchEditor = function () {
 							showEditorDialog();
 							const args = ['--path', '/home/web_user', '--editor', '--single-window', '--rendering-driver', "opengl3"];
@@ -692,30 +711,16 @@ ___GODOT_BROTLI_SCRIPT___
 							});
 						};
 
-						const chapter = getChapter();
-						const chapterKey = (chapter || 'main') + (new URLSearchParams(window.location.search).get('debug') === '1' ? ':debug' : '');
-
+						// Persisted project present (matching chapter, or the user declined the replace).
 						if (editor.fileExists('/home/web_user/project.godot')) {
-							// Reuse persisted project only if it belongs to the requested chapter.
-							let loaded = null;
-							try { loaded = localStorage.getItem('loadedChapter'); } catch (e) { /* ignore */ }
-							if (zip || loaded === null || loaded === chapterKey) {
-								launchEditor();
-								return;
-							}
-							// Different chapter requested: confirm before replacing saved work.
-							if (!window.confirm('Replace your current work with chapter "' + (chapter || 'project') + '"? Unsaved changes will be lost.')) {
-								launchEditor();
-								return;
-							}
-							// Fall through to fetch the new chapter. The old project is cleared
-							// by the preload zip import (see clearProject below).
-							clearProject();
+							launchEditor();
+							return;
 						}
 
 						let zipUrl;
 						try {
 							zipUrl = zip ? null : getChapterZipUrl(chapter);
+							console.log('[chapter] loading ' + (zip ? 'user-provided zip' : zipUrl));
 						} catch (err) {
 							displayFailureNotice(err);
 							return;
@@ -723,11 +728,14 @@ ___GODOT_BROTLI_SCRIPT___
 
 						const zipPromise = zip
 							? Promise.resolve(zip)
-							: fetch(zipUrl).then(function (response) {
-								if (!response.ok) {
-									throw new Error('Failed to fetch ' + zipUrl);
-								}
-								return response.arrayBuffer();
+							: fetchZip(zipUrl).catch(function (err) {
+								// Final backup: with no ?chapter given, look for the zip next to this page.
+								if (chapter) throw err;
+								const fallbackUrl = zipUrl.replace(/^chapters\/[^/]+\//, '');
+								console.warn(err.message + '; trying ' + fallbackUrl);
+								return fetchZip(fallbackUrl).catch(function () {
+									throw new Error('Failed to fetch ' + zipUrl + ' or ' + fallbackUrl);
+								});
 							});
 
 						zipPromise.then(function (zipData) {
@@ -737,6 +745,15 @@ ___GODOT_BROTLI_SCRIPT___
 						}).catch(displayFailureNotice);
 					}).catch(displayFailureNotice);
 				}
+			}
+
+			function fetchZip(url) {
+				return fetch(url).then(function (response) {
+					if (!response.ok) {
+						throw new Error('Failed to fetch ' + url);
+					}
+					return response.arrayBuffer();
+				});
 			}
 
 			function getChapter() {
@@ -752,29 +769,21 @@ ___GODOT_BROTLI_SCRIPT___
 				return 'chapters/' + chapter + '/' + (debug ? 'debug-project.zip' : 'project.zip');
 			}
 
-			function clearProject() {
-				// Remove the persisted project so the new chapter's zip replaces it.
-				const FS = editor.rtenv && editor.rtenv['FS'];
-				if (!FS) {
-					console.warn('Emscripten FS not exposed; old project files may remain.');
-					return;
-				}
-				const rmrf = function (path) {
-					let entries;
-					try { entries = FS.readdir(path); } catch (e) { return; }
-					entries.forEach(function (name) {
-						if (name === '.' || name === '..') return;
-						const full = path + '/' + name;
-						const stat = FS.stat(full);
-						if (FS.isDir(stat.mode)) {
-							rmrf(full);
-							FS.rmdir(full);
-						} else {
-							FS.unlink(full);
-						}
-					});
-				};
-				try { rmrf('/home/web_user'); } catch (e) { console.warn('Failed to clear project', e); }
+			function clearPersistedProject() {
+				// Godot mounts IDBFS at /home/web_user; Emscripten names the IndexedDB database after the mount path.
+				return new Promise(function (resolve) {
+					try {
+						const req = indexedDB.deleteDatabase('/home/web_user');
+						req.onsuccess = req.onerror = function () { resolve(); };
+						req.onblocked = function () {
+							console.warn('Clearing the saved project is blocked by another open editor tab.');
+							resolve();
+						};
+					} catch (e) {
+						console.warn('Failed to clear saved project', e);
+						resolve();
+					}
+				});
 			}
 
 			function preloadZip(target) {
