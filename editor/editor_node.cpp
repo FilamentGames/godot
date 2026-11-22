@@ -8055,11 +8055,11 @@ void EditorNode::_build_file_menu() {
 	//file_menu->add_shortcut(ED_GET_SHORTCUT("editor/quick_open_script"), SCENE_QUICK_OPEN_SCRIPT);
 	//file_menu->add_separator();
 
-	//if (!export_as_menu) {
-	//	export_as_menu = memnew(PopupMenu);
-	//	export_as_menu->add_shortcut(ED_GET_SHORTCUT("editor/export_as_mesh_library"), FILE_EXPORT_MESH_LIBRARY);
-	//	export_as_menu->connect("index_pressed", callable_mp(this, &EditorNode::_export_as_menu_option));
-	//}
+	if (!export_as_menu) {
+		export_as_menu = memnew(PopupMenu);
+		// export_as_menu->add_shortcut(ED_GET_SHORTCUT("editor/export_as_mesh_library"), FILE_EXPORT_MESH_LIBRARY);
+		export_as_menu->connect("index_pressed", callable_mp(this, &EditorNode::_export_as_menu_option));
+	}
 	//file_menu->add_submenu_node_item(TTRC("Export As..."), export_as_menu, SCENE_EXPORT_AS);
 	//file_menu->add_separator();
 
